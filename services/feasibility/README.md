@@ -11,3 +11,12 @@ Implements `POST /feasibility` — see [`docs/api-contract.md`](../../docs/api-c
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8001
 ```
+
+Currently returns contract-shaped mock data (seeded per location+category, not random
+noise) — real scoring/SWOT/pricing logic is TODO.
+
+## Tests
+
+```bash
+pytest
+```
