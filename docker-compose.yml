@@ -1,0 +1,80 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sih26091
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend-api:
+    build: ./backend-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    volumes:
+      - ./backend-api:/app
+
+  # --- Stub entries below: uncomment and fill in as each service gets a Dockerfile. ---
+  # Until then, run these locally with `uvicorn` per service README during dev.
+
+  # feasibility:
+  #   build: ./services/feasibility
+  #   restart: unless-stopped
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "8001:8001"
+  #   volumes:
+  #     - ./services/feasibility:/app
+
+  # calculator:
+  #   build: ./services/calculator
+  #   restart: unless-stopped
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "8002:8002"
+  #   volumes:
+  #     - ./services/calculator:/app
+
+  # ess-scoring:
+  #   build: ./services/ess-scoring
+  #   restart: unless-stopped
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "8003:8003"
+  #   volumes:
+  #     - ./services/ess-scoring:/app
+
+  # advisory-llm:
+  #   build: ./services/advisory-llm
+  #   restart: unless-stopped
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "8004:8004"
+  #   volumes:
+  #     - ./services/advisory-llm:/app
+
+  # frontend:
+  #   build: ./frontend
+  #   restart: unless-stopped
+  #   ports:
+  #     - "5173:5173"
+  #   volumes:
+  #     - ./frontend:/app
+
+volumes:
+  postgres_data:
