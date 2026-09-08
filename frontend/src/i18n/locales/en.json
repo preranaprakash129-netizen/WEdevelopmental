@@ -1,0 +1,77 @@
+{
+  "common": {
+    "appName": "Business Advisory",
+    "next": "Next",
+    "back": "Back",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "languageLabel": "Language"
+  },
+  "nav": {
+    "intake": "Intake",
+    "feasibility": "Feasibility Report",
+    "calculator": "Loan Calculator",
+    "dashboard": "Officer Dashboard"
+  },
+  "intake": {
+    "title": "Tell us about your business idea",
+    "locationLabel": "Location",
+    "locationPlaceholder": "e.g. Rampur",
+    "categoryLabel": "Business category",
+    "categoryPlaceholder": "e.g. dairy, tailoring",
+    "marginCapitalLabel": "Your available capital (INR)",
+    "marginCapitalPlaceholder": "e.g. 50000",
+    "submitCta": "Check Feasibility"
+  },
+  "feasibility": {
+    "title": "Feasibility Report",
+    "feasibilityScore": "Feasibility Score",
+    "confidenceRange": "Confidence range",
+    "marketReach": "Market Reach",
+    "estimatedCustomers": "Estimated customers",
+    "radius": "Radius (km)",
+    "competitors": "Nearby Competitors",
+    "noCompetitors": "No competitors found nearby.",
+    "swot": "SWOT Analysis",
+    "strengths": "Strengths",
+    "weaknesses": "Weaknesses",
+    "opportunities": "Opportunities",
+    "threats": "Threats",
+    "pricingBands": "Pricing Bands",
+    "low": "Low",
+    "median": "Median",
+    "high": "High",
+    "continueCta": "Continue to Calculator"
+  },
+  "calculator": {
+    "title": "Loan & EMI Calculator",
+    "requestedLoanLabel": "Requested loan amount (optional, INR)",
+    "requestedLoanPlaceholder": "Leave blank for recommendation",
+    "recalculate": "Recalculate",
+    "projectCost": "Project Cost",
+    "schemeSelected": "Scheme Selected",
+    "subsidyPercent": "Subsidy",
+    "loanAmount": "Loan Amount",
+    "workingCapital": "Working Capital Buffer",
+    "moratorium": "Moratorium",
+    "moratoriumMonths": "months",
+    "emiSchedule": "EMI Schedule",
+    "month": "Month",
+    "emi": "EMI",
+    "principal": "Principal",
+    "interest": "Interest",
+    "balance": "Outstanding Balance",
+    "continueCta": "View Dashboard"
+  },
+  "dashboard": {
+    "title": "Officer Dashboard",
+    "subtitle": "Overview of submitted applications",
+    "placeholder": "Applicant data will appear here once backend-api is connected.",
+    "columnApplicant": "Applicant",
+    "columnCategory": "Category",
+    "columnLocation": "Location",
+    "columnEssScore": "ESS Score",
+    "columnStatus": "Status"
+  }
+}
