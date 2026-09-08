@@ -1,12 +1,11 @@
 # Each folder maps to its owner for this hackathon.
-# Replace the placeholder usernames with real GitHub handles.
 
-/frontend/                 @person5
-/backend-api/              @person1
-/services/feasibility/     @person2
-/services/calculator/      @person3
-/services/ess-scoring/     @person4
-/services/advisory-llm/    @person6
-/data/seed/                @person1 @person2 @person3 @person4 @person5 @person6
-/infra/docker/             @person1
-/docs/                     @person1 @person2 @person3 @person4 @person5 @person6
+/frontend/                 @dushya-nth
+/backend-api/              @Kashif2310-bot
+/services/feasibility/     @jordanv25
+/services/calculator/      @aaditan20-crypto
+/services/ess-scoring/     @preranaprakash129-netizen
+/services/advisory-llm/    @vamshikrishna21vk
+/data/seed/                @Kashif2310-bot @jordanv25 @aaditan20-crypto @preranaprakash129-netizen @dushya-nth @vamshikrishna21vk
+/infra/docker/             @Kashif2310-bot
+/docs/                     @Kashif2310-bot @jordanv25 @aaditan20-crypto @preranaprakash129-netizen @dushya-nth @vamshikrishna21vk

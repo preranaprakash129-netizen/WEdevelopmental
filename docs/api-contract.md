@@ -23,6 +23,16 @@ testing, and also proxied through `backend-api` (the gateway) at `/api/*`.
   examples below for brevity but must be implemented.
 - Error shape (all services): `{"error": {"code": string, "message": string}}` with a 4xx/5xx
   HTTP status.
+- **Auth:** none for this hackathon build. No auth headers/tokens required on any endpoint.
+
+## Orchestration
+
+`backend-api` is the only service allowed to call other services. `feasibility`,
+`calculator`, `ess-scoring`, and `advisory-llm` never call each other directly — if one
+service's logic depends on another's output (e.g. `calculator` needing a `project_cost`
+estimate from `feasibility`), `backend-api` fetches it and passes it in as part of the
+request to the downstream service. Do not add HTTP calls from one `services/*` folder to
+another.
 
 ---
 
@@ -98,6 +108,11 @@ Owner: `services/feasibility` (person 2)
 ## 2. `POST /calculator`
 
 Owner: `services/calculator` (person 3)
+
+> **Note:** `calculator` must not call `feasibility` directly. If `project_cost` needs a
+> feasibility-derived estimate, `backend-api` fetches it from `feasibility` and passes it
+> into this endpoint (or a future field on this request) — see [Orchestration](#orchestration)
+> above.
 
 ### Request
 
@@ -271,6 +286,7 @@ Owner: `services/advisory-llm` (person 6)
 
 ## Open questions (track here, resolve async)
 
-- [ ] Auth: none for hackathon demo, or a shared static API key across services?
-- [ ] Should `calculator` call `feasibility` internally for `project_cost` estimation, or does `backend-api` orchestrate that?
-- [ ] Currency/locale formatting on frontend — raw numbers only per this contract, frontend formats for display.
+- [x] Auth — resolved: none for this hackathon build (see Conventions above).
+- [x] Calculator/feasibility orchestration — resolved: `backend-api` orchestrates, services never call each other directly (see Orchestration above).
+
+All open questions resolved as of this revision.
