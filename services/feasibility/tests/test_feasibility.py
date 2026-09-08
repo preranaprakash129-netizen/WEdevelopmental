@@ -37,10 +37,25 @@ def test_feasibility_missing_field_returns_contract_error_shape():
     assert set(body["error"]) == {"code", "message"}
 
 
-def test_feasibility_unknown_location_still_returns_mock():
+def test_feasibility_unknown_location_returns_valid_shape_with_empty_competitors():
     resp = client.post(
         "/feasibility",
         json={"location": "Nowhereville", "category": "handicrafts", "margin_capital": 10000},
     )
     assert resp.status_code == 200
-    assert resp.json()["competitor_list"]
+    assert resp.json()["competitor_list"] == []
+
+
+def test_confidence_range_narrower_when_location_and_category_data_both_match():
+    known = client.post(
+        "/feasibility",
+        json={"location": "Rampur", "category": "dairy", "margin_capital": 50000},
+    ).json()
+    unknown = client.post(
+        "/feasibility",
+        json={"location": "Nowhereville", "category": "handicrafts", "margin_capital": 10000},
+    ).json()
+
+    known_spread = known["confidence_range"]["high"] - known["confidence_range"]["low"]
+    unknown_spread = unknown["confidence_range"]["high"] - unknown["confidence_range"]["low"]
+    assert known_spread < unknown_spread
