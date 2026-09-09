@@ -38,15 +38,15 @@ services:
   #   volumes:
   #     - ./services/feasibility:/app
 
-  # calculator:
-  #   build: ./services/calculator
-  #   restart: unless-stopped
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - "8002:8002"
-  #   volumes:
-  #     - ./services/calculator:/app
+  calculator:
+    build: ./services/calculator
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./services/calculator:/app
 
   # ess-scoring:
   #   build: ./services/ess-scoring
