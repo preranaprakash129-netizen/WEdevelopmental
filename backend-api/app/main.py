@@ -1,8 +1,10 @@
 import os
 import uuid
 
+import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 app = FastAPI(title="SIH26091 backend-api", version="0.1.0")
 
@@ -14,13 +16,15 @@ app.add_middleware(
 )
 
 # Downstream service base URLs. backend-api is the only service allowed to call
-# these directly (see docs/api-contract.md > Orchestration). Not yet wired up —
-# each route below returns a stub payload matching the contract until the
-# corresponding service is ready to be proxied to.
+# these directly (see docs/api-contract.md > Orchestration). /api/feasibility now
+# proxies to FEASIBILITY_URL; the other three routes still return stub payloads
+# until their services are ready to be proxied to.
 FEASIBILITY_URL = os.getenv("FEASIBILITY_URL", "http://localhost:8001")
 CALCULATOR_URL = os.getenv("CALCULATOR_URL", "http://localhost:8002")
 ESS_SCORING_URL = os.getenv("ESS_SCORING_URL", "http://localhost:8003")
 ADVISORY_LLM_URL = os.getenv("ADVISORY_LLM_URL", "http://localhost:8004")
+
+DOWNSTREAM_TIMEOUT_SECONDS = 10.0
 
 
 def _request_id() -> str:
@@ -34,23 +38,21 @@ def health():
 
 @app.post("/api/feasibility")
 def feasibility(payload: dict):
-    return {
-        "request_id": _request_id(),
-        "market_reach": {"estimated_customers": 1200, "radius_km": 3.5},
-        "competitor_list": [
-            {"name": "Shree Dairy", "category": "dairy", "distance_km": 1.2},
-            {"name": "Gopal Milk Center", "category": "dairy", "distance_km": 2.8},
-        ],
-        "swot": {
-            "strengths": ["Low local competition density", "Steady demand for milk products"],
-            "weaknesses": ["High cold-chain setup cost"],
-            "opportunities": ["Government dairy subsidy schemes available"],
-            "threats": ["Seasonal demand fluctuation"],
-        },
-        "pricing_bands": {"low": 40, "median": 55, "high": 70},
-        "feasibility_score": 72.5,
-        "confidence_range": {"low": 64.0, "high": 79.0},
-    }
+    try:
+        resp = httpx.post(
+            f"{FEASIBILITY_URL}/feasibility", json=payload, timeout=DOWNSTREAM_TIMEOUT_SECONDS
+        )
+    except httpx.RequestError:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "error": {
+                    "code": "feasibility_unavailable",
+                    "message": "Could not reach the feasibility service",
+                }
+            },
+        )
+    return JSONResponse(status_code=resp.status_code, content=resp.json())
 
 
 @app.post("/api/calculator")
