@@ -1,0 +1,56 @@
+{
+  "location_name": "Sundarpur",
+  "state": "Tamil Nadu",
+  "population": 15600,
+  "population_density_per_sqkm": 540,
+  "type": "semi-urban",
+  "existing_businesses": [
+    {
+      "name": "Amma's Pickles & Foods",
+      "category": "food-processing",
+      "distance_from_center_km": 1.3,
+      "years_operating": 5,
+      "estimated_monthly_revenue": 62000
+    },
+    {
+      "name": "Sundarpur Snacks Co.",
+      "category": "food-processing",
+      "distance_from_center_km": 2.7,
+      "years_operating": 2,
+      "estimated_monthly_revenue": 38000
+    },
+    {
+      "name": "Meenakshi Food Products",
+      "category": "food-processing",
+      "distance_from_center_km": 2.9,
+      "years_operating": 8,
+      "estimated_monthly_revenue": 95000
+    },
+    {
+      "name": "Sundarpur Kirana Store",
+      "category": "retail-kirana",
+      "distance_from_center_km": 0.5,
+      "years_operating": 12,
+      "estimated_monthly_revenue": 110000
+    },
+    {
+      "name": "Lakshmi General Stores",
+      "category": "retail-kirana",
+      "distance_from_center_km": 1.8,
+      "years_operating": 6,
+      "estimated_monthly_revenue": 70000
+    },
+    {
+      "name": "New Fashion Tailors",
+      "category": "tailoring",
+      "distance_from_center_km": 2.2,
+      "years_operating": 4,
+      "estimated_monthly_revenue": 28000
+    }
+  ],
+  "price_bands": [
+    { "category": "food-processing", "unit": "per kg", "low": 120, "median": 180, "high": 260 },
+    { "category": "retail-kirana", "unit": "per basket", "low": 200, "median": 350, "high": 550 },
+    { "category": "tailoring", "unit": "per garment", "low": 150, "median": 280, "high": 480 }
+  ]
+}

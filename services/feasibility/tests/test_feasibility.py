@@ -59,3 +59,28 @@ def test_confidence_range_narrower_when_location_and_category_data_both_match():
     known_spread = known["confidence_range"]["high"] - known["confidence_range"]["low"]
     unknown_spread = unknown["confidence_range"]["high"] - unknown["confidence_range"]["low"]
     assert known_spread < unknown_spread
+
+
+def test_real_seed_data_produces_distinct_sensible_scores():
+    combos = [
+        ("Rampur", "dairy", 50000),
+        ("Rampur", "tailoring", 20000),
+        ("Sundarpur", "food-processing", 80000),
+    ]
+    results = []
+    for location, category, margin_capital in combos:
+        resp = client.post(
+            "/feasibility",
+            json={"location": location, "category": category, "margin_capital": margin_capital},
+        )
+        assert resp.status_code == 200
+        results.append(resp.json())
+
+    scores = [r["feasibility_score"] for r in results]
+    assert len(set(scores)) == len(scores), "expected each combination to score differently"
+
+    for r in results:
+        assert 0 <= r["feasibility_score"] <= 100
+        assert r["confidence_range"]["low"] <= r["feasibility_score"] <= r["confidence_range"]["high"]
+        assert r["competitor_list"], "real seed data has competitors in these categories"
+        assert r["swot"]["strengths"] or r["swot"]["weaknesses"]
