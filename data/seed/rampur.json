@@ -1,0 +1,56 @@
+{
+  "location_name": "Rampur",
+  "state": "Uttar Pradesh",
+  "population": 8400,
+  "population_density_per_sqkm": 320,
+  "type": "rural",
+  "existing_businesses": [
+    {
+      "name": "Shree Dairy",
+      "category": "dairy",
+      "distance_from_center_km": 1.2,
+      "years_operating": 6,
+      "estimated_monthly_revenue": 45000
+    },
+    {
+      "name": "Gopal Milk Center",
+      "category": "dairy",
+      "distance_from_center_km": 2.6,
+      "years_operating": 4,
+      "estimated_monthly_revenue": 32000
+    },
+    {
+      "name": "Krishna Dairy Farm",
+      "category": "dairy",
+      "distance_from_center_km": 4.1,
+      "years_operating": 9,
+      "estimated_monthly_revenue": 58000
+    },
+    {
+      "name": "Rampur Tailors",
+      "category": "tailoring",
+      "distance_from_center_km": 0.8,
+      "years_operating": 10,
+      "estimated_monthly_revenue": 24000
+    },
+    {
+      "name": "Sharma Boutique & Tailoring",
+      "category": "tailoring",
+      "distance_from_center_km": 1.9,
+      "years_operating": 3,
+      "estimated_monthly_revenue": 15000
+    },
+    {
+      "name": "Rampur General Store",
+      "category": "retail-kirana",
+      "distance_from_center_km": 0.4,
+      "years_operating": 15,
+      "estimated_monthly_revenue": 90000
+    }
+  ],
+  "price_bands": [
+    { "category": "dairy", "unit": "per litre", "low": 40, "median": 55, "high": 70 },
+    { "category": "tailoring", "unit": "per garment", "low": 120, "median": 250, "high": 450 },
+    { "category": "retail-kirana", "unit": "per basket", "low": 150, "median": 300, "high": 500 }
+  ]
+}
