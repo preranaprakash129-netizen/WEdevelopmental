@@ -1,0 +1,29 @@
+{
+  "_comment": [
+    "Documents ingested by `python -m app.ingest`. This file is the source of truth for",
+    "the `scheme`, `document` and `url` values that appear in cited_sources.",
+    "To ingest: download the official PDF, save it in corpus/pdfs/ under the exact",
+    "`source_pdf` filename below, set `document` to the title printed on the PDF",
+    "(including its year/revision) and `pdf_url` to the exact link you downloaded, then",
+    "run the ingest CLI. `url` is the citation link shown to the user, so it should be a",
+    "stable landing page rather than a deep link that rots.",
+    "First ingestion pass is PMEGP + MUDRA; the RBI MSME restructuring circular is",
+    "intentionally deferred, add it as a third entry when we pick it up."
+  ],
+  "documents": [
+    {
+      "scheme": "PMEGP",
+      "document": "PMEGP Guidelines",
+      "url": "https://kviconline.gov.in/pmegp",
+      "pdf_url": null,
+      "source_pdf": "pmegp-guidelines.pdf"
+    },
+    {
+      "scheme": "MUDRA",
+      "document": "Pradhan Mantri MUDRA Yojana",
+      "url": "https://www.mudra.org.in/",
+      "pdf_url": null,
+      "source_pdf": "mudra-pmmy.pdf"
+    }
+  ]
+}
