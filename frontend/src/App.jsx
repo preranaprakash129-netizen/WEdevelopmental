@@ -5,10 +5,11 @@ import { useIntake } from './context/IntakeContext.jsx'
 import IntakePage from './pages/IntakePage.jsx'
 import FeasibilityPage from './pages/FeasibilityPage.jsx'
 import CalculatorPage from './pages/CalculatorPage.jsx'
+import EssScorePage from './pages/EssScorePage.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
 
 export default function App() {
-  const { isIntakeComplete, feasibility } = useIntake()
+  const { isIntakeComplete, feasibility, calculator } = useIntake()
 
   return (
     <Routes>
@@ -27,6 +28,14 @@ export default function App() {
           element={
             <RequireStep ok={isIntakeComplete && Boolean(feasibility)} fallback="/feasibility">
               <CalculatorPage />
+            </RequireStep>
+          }
+        />
+        <Route
+          path="/ess-score"
+          element={
+            <RequireStep ok={isIntakeComplete && Boolean(calculator)} fallback="/calculator">
+              <EssScorePage />
             </RequireStep>
           }
         />

@@ -23,6 +23,7 @@ export function IntakeProvider({ children }) {
   const [intake, setIntakeState] = useState(loadInitial)
   const [feasibility, setFeasibility] = useState(null)
   const [calculator, setCalculator] = useState(null)
+  const [essScore, setEssScore] = useState(null)
 
   const setIntake = useCallback((next) => {
     setIntakeState(next)
@@ -44,8 +45,10 @@ export function IntakeProvider({ children }) {
       setFeasibility,
       calculator,
       setCalculator,
+      essScore,
+      setEssScore,
     }),
-    [intake, setIntake, isIntakeComplete, feasibility, calculator],
+    [intake, setIntake, isIntakeComplete, feasibility, calculator, essScore],
   )
 
   return <IntakeContext.Provider value={value}>{children}</IntakeContext.Provider>
