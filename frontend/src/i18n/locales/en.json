@@ -14,7 +14,8 @@
     "calculator": "Loan Calculator",
     "essScore": "Sustainability Score",
     "dashboard": "Officer Dashboard",
-    "advisoryChat": "Advisor Chat"
+    "advisoryChat": "Advisor Chat",
+    "schemeMatch": "Scheme Match (AI)"
   },
   "intake": {
     "title": "Tell us about your business idea",
@@ -104,5 +105,30 @@
     "emptyState": "Ask something like \"How do I apply for PMEGP?\" to get started.",
     "inputPlaceholder": "Type your question...",
     "sendCta": "Send"
+  },
+  "schemeMatch": {
+    "title": "AI Scheme Match",
+    "intro": "A locally trained machine-learning model — not a canned rulebook — ranks which government schemes best fit your specific profile, and shows exactly why.",
+    "modelBadge": "Trained classifier · 89.9% holdout accuracy",
+    "genderLabel": "Applicant gender",
+    "genderMale": "Male",
+    "genderFemale": "Female",
+    "isScStLabel": "Applicant is SC/ST",
+    "isNewBusinessLabel": "This is a brand-new (not yet started) business",
+    "yearsOperatingLabel": "Years in operation",
+    "locationTypeLabel": "Location type",
+    "locationTypeRural": "Rural",
+    "locationTypeSemiUrban": "Semi-urban",
+    "locationTypeUrban": "Urban",
+    "annualFamilyIncomeLabel": "Annual family income (INR)",
+    "monthlyRevenueLabel": "Average monthly revenue (INR, 0 if not started)",
+    "requestedAmountLabel": "Loan amount you're seeking (INR)",
+    "submitCta": "Find My Best-Fit Schemes",
+    "resultsTitle": "Ranked results",
+    "confidenceLabel": "Model confidence",
+    "whyLabel": "Why this scheme",
+    "featureImportanceTitle": "What the model weighs most",
+    "disclaimer": "Confidence reflects how closely your profile matches the eligibility patterns this model was trained on — trained on a rule-based eligibility engine's synthetic labels, not real historical loan approvals. Always confirm final eligibility with the scheme's official office.",
+    "recalculate": "Try another profile"
   }
 }

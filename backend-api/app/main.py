@@ -238,3 +238,26 @@ def list_applications():
         return _db_unavailable_response()
 
     return {"applications": [_serialize_row(row) for row in rows]}
+
+
+# Same downstream service as advisory-chat (advisory-llm hosts both the chat
+# endpoint and the trained scheme-match classifier) — reuses ADVISORY_LLM_URL
+# rather than introducing a new env var for a service that isn't actually
+# separate. See services/advisory-llm/app/scheme_match.py.
+@app.post("/api/scheme-match")
+def scheme_match(payload: dict):
+    try:
+        resp = httpx.post(
+            f"{ADVISORY_LLM_URL}/scheme-match", json=payload, timeout=DOWNSTREAM_TIMEOUT_SECONDS
+        )
+    except httpx.RequestError:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "error": {
+                    "code": "scheme_match_unavailable",
+                    "message": "Could not reach the scheme-match model",
+                }
+            },
+        )
+    return JSONResponse(status_code=resp.status_code, content=resp.json())

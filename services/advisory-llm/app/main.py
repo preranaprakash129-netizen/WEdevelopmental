@@ -1,11 +1,19 @@
+import uuid
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from . import local_advisor, scheme_match
 from .advisor import AdvisoryError, build_advisory_response
 from .config import get_settings
 from .retrieval import load_chunks
-from .schemas import AdvisoryChatRequest, AdvisoryChatResponse
+from .schemas import (
+    AdvisoryChatRequest,
+    AdvisoryChatResponse,
+    SchemeMatchRequest,
+    SchemeMatchResponse,
+)
 
 app = FastAPI(title="advisory-llm", version="0.1.0")
 
@@ -36,11 +44,9 @@ async def health():
 
 @app.get("/debug/status")
 async def debug_status():
-    """Which mode we're in and what's actually ingested.
-
-    Not in the contract — it exists so nobody has to guess during the demo
-    whether an answer came from the real corpus or from mock mode.
-    """
+    """Which mode we're in and what's actually available. Not in the contract --
+    it exists so nobody has to guess during the demo whether an answer came from
+    the real corpus, the trained local classifier, or mock mode."""
     settings = get_settings()
     chunks = load_chunks(settings.chunks_path)
     return {
@@ -49,11 +55,14 @@ async def debug_status():
         "corpus_chunks": len(chunks),
         "corpus_schemes": sorted({chunk.scheme for chunk in chunks}),
         "translator": "bhashini" if settings.bhashini_api_key else "passthrough",
+        "local_advisor_model_available": local_advisor.is_model_available(),
+        "scheme_match_model_available": scheme_match.is_model_available(),
     }
 
 
 # Sync on purpose: in rag mode this makes a blocking API call, so FastAPI should
-# run it in the threadpool rather than on the event loop.
+# run it in the threadpool rather than on the event loop. local_ml and mock mode
+# are fast and CPU-only, so running them sync here costs nothing.
 @app.post(
     "/advisory-chat",
     response_model=AdvisoryChatResponse,
@@ -63,3 +72,19 @@ async def debug_status():
 )
 def advisory_chat(payload: AdvisoryChatRequest):
     return build_advisory_response(payload, get_settings())
+
+
+# Not part of the original 4-endpoint contract — added for the trained
+# scheme-match classifier (see app/scheme_match.py and train/). Always
+# available regardless of ADVISORY_MODE, since it's a separate trained model
+# with its own artifact, not gated behind the chat mode.
+@app.post("/scheme-match", response_model=SchemeMatchResponse)
+def scheme_match_endpoint(payload: SchemeMatchRequest):
+    profile = payload.model_dump()
+    results = scheme_match.predict_ranked_schemes(profile, top_k=3)
+    importance = scheme_match.model_feature_importance() or {}
+    return SchemeMatchResponse(
+        request_id=str(uuid.uuid4()),
+        results=results,
+        model_feature_importance=importance,
+    )

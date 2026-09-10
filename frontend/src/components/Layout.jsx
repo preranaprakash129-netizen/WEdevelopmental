@@ -28,6 +28,9 @@ export default function Layout() {
             <NavLink to="/ess-score" className={navLinkClass}>
               {t('nav.essScore')}
             </NavLink>
+            <NavLink to="/scheme-match" className={navLinkClass}>
+              {t('nav.schemeMatch')}
+            </NavLink>
             <NavLink to="/dashboard" className={navLinkClass}>
               {t('nav.dashboard')}
             </NavLink>

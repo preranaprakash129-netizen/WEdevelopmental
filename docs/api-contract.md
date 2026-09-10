@@ -13,7 +13,7 @@ testing, and also proxied through `backend-api` (the gateway) at `/api/*`.
 | feasibility | 8001 | `/api/feasibility` |
 | calculator | 8002 | `/api/calculator` |
 | ess-scoring | 8003 | `/api/ess-score` |
-| advisory-llm | 8004 | `/api/advisory-chat` |
+| advisory-llm | 8004 | `/api/advisory-chat`, `/api/scheme-match` |
 
 **Conventions:**
 - All requests/responses are `application/json`.
@@ -319,6 +319,89 @@ with the standard error shape if the database isn't reachable.
 No request body. Response: `200` with `{"applications": [...]}`, same row shape as above,
 newest first, capped at 100. `503` with the standard error shape if the database isn't
 reachable.
+
+---
+
+## 6. `POST /scheme-match`
+
+Owner: `services/advisory-llm` (person 6)
+
+Not part of the original 4-endpoint contract. Backed by a locally trained scikit-learn
+classifier (`RandomForestClassifier`, see `services/advisory-llm/train/train_scheme_match.py`)
+— no external API call. The model is trained on synthetic profiles labeled by a real
+rule-based eligibility/fit engine (rule distillation), **not** on real historical loan
+outcomes; treat `confidence` as "how well this profile matches the pattern of profiles the
+rules say fit this scheme," not a probability of loan approval. Verified holdout accuracy
+89.9%, macro F1 88.6%, 5-fold CV accuracy 89.85% ± 0.71% (see
+`services/advisory-llm/models/scheme_match_report.txt` after training).
+
+Always available regardless of `ADVISORY_MODE` — it's a separate trained artifact, not
+gated behind the chat mode.
+
+### Request
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `category` | string | required | Business category, e.g. `"dairy"`, `"food-processing"` |
+| `is_new_business` | boolean | required | |
+| `years_operating` | integer | required | ≥ 0 |
+| `gender` | string | required | `"male"` or `"female"` |
+| `is_sc_st` | boolean | required | |
+| `location_type` | string | required | `"urban"`, `"rural"`, or `"semi-urban"` |
+| `annual_family_income` | integer | required | INR, ≥ 0 |
+| `monthly_revenue` | integer | required | INR, ≥ 0 |
+| `requested_amount` | integer | required | INR, > 0 |
+| `margin_capital` | integer | required | INR, ≥ 0 |
+
+```json
+{
+  "category": "dairy",
+  "is_new_business": false,
+  "years_operating": 2,
+  "gender": "female",
+  "is_sc_st": true,
+  "location_type": "rural",
+  "annual_family_income": 90000,
+  "monthly_revenue": 15000,
+  "requested_amount": 150000,
+  "margin_capital": 20000
+}
+```
+
+### Response
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `results` | array<object> | required | Top schemes, ranked by `confidence` desc |
+| `results[].scheme` | string | required | Short scheme key, e.g. `"PMEGP"`, `"MUDRA"`, `"Karnataka Udyogini"` — matches `scheme` in `POST /advisory-chat`'s `cited_sources` |
+| `results[].display_name` | string | required | Full scheme name, e.g. `"Udyogini Scheme (Karnataka)"` |
+| `results[].confidence` | number | required | 0–1, model confidence — see rule-distillation caveat above |
+| `results[].why` | array<string> | required | Plain-language, rule-based reasons (not model self-explanation) |
+| `results[].url` | string | required | Official scheme page |
+| `model_feature_importance` | object | required | Global feature importances from the trained model, for transparency |
+
+```json
+{
+  "results": [
+    {
+      "scheme": "Karnataka Udyogini",
+      "display_name": "Udyogini Scheme (Karnataka)",
+      "confidence": 0.6399,
+      "why": [
+        "Reserved for women entrepreneurs, which matches the applicant.",
+        "Open to existing businesses, not just new ones.",
+        "Requested amount fits the scheme's Rs.0-Rs.300,000 range."
+      ],
+      "url": "https://kswdc.karnataka.gov.in/"
+    }
+  ],
+  "model_feature_importance": {
+    "category": 0.4004,
+    "requested_amount": 0.2175,
+    "margin_capital": 0.0858
+  }
+}
+```
 
 ---
 
