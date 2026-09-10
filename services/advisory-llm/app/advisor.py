@@ -97,10 +97,11 @@ def build_advisory_response(payload: AdvisoryChatRequest, settings: Settings) ->
     if settings.mode == MODE_LOCAL_ML:
         # No network call, no external API, no generative model -- see
         # local_advisor.py's module docstring for the full design rationale.
-        # English-only templates for now regardless of `detected`; a Kannada
-        # template set would read from the same scheme_facts.py data and is
-        # the natural next step, not a rewrite.
-        local_result = local_advisor.answer(message)
+        # English and Kannada answer templates exist (see local_advisor.py);
+        # anything else falls back to English. Note this only makes the
+        # *output* bilingual -- the scheme/intent classifiers themselves are
+        # still trained on English question text only.
+        local_result = local_advisor.answer(message, language=detected)
         response_text = local_result["response_text"]
         cited_sources = local_result["cited_sources"]
     elif settings.mode == MODE_RAG:

@@ -54,3 +54,16 @@ def test_advisory_chat_endpoint_uses_local_ml_and_cites_sources(monkeypatch):
     assert resp.status_code == 200
     body = resp.json()
     assert [s["scheme"] for s in body["cited_sources"]] == ["PMEGP"]
+
+
+def test_kannada_language_gets_kannada_answer_text():
+    result = local_advisor.answer("Am I eligible for PMEGP?", language="kn")
+    assert [s["scheme"] for s in result["cited_sources"]] == ["PMEGP"]
+    assert "PMEGP" in result["response_text"]
+    # Kannada script present, not just the English template reused
+    assert any("ಀ" <= ch <= "೿" for ch in result["response_text"])
+
+
+def test_default_language_is_still_english():
+    result = local_advisor.answer("Am I eligible for PMEGP?")
+    assert "open to general applicants" in result["response_text"]

@@ -11,7 +11,8 @@ import AdvisoryChatPage from './pages/AdvisoryChatPage.jsx'
 import SchemeMatchPage from './pages/SchemeMatchPage.jsx'
 
 export default function App() {
-  const { isIntakeComplete, feasibility, calculator } = useIntake()
+  const { isIntakeComplete, feasibility, calculator, intake } = useIntake()
+  const hasCategory = Boolean(intake.category)
 
   return (
     <Routes>
@@ -44,7 +45,7 @@ export default function App() {
         <Route
           path="/scheme-match"
           element={
-            <RequireStep ok={isIntakeComplete} fallback="/">
+            <RequireStep ok={hasCategory} fallback="/">
               <SchemeMatchPage />
             </RequireStep>
           }
