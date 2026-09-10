@@ -14,6 +14,9 @@ def calculator(request: CalculatorRequest) -> CalculatorResponse:
     project_cost, terms, loan_amount, schedule = calculate(
         request.margin_capital,
         request.requested_loan_amount,
+        social_category=request.social_category,
+        gender=request.gender,
+        requested_scheme=request.requested_scheme,
     )
     return CalculatorResponse(
         request_id=str(uuid4()),

@@ -122,6 +122,11 @@ Owner: `services/calculator` (person 3)
 | `category` | string | required | Business category |
 | `location` | string | optional | Used for scheme eligibility rules that vary by state/UT |
 | `requested_loan_amount` | number | optional | If omitted, service recommends amount |
+| `social_category` | string | optional | One of `"general"`, `"obc"`, `"sc"`, `"st"` — used for Stand-Up India eligibility |
+| `gender` | string | optional | One of `"male"`, `"female"`, `"other"` — used for Stand-Up India eligibility |
+| `is_rural` | boolean | optional | Accepted, not yet used in scheme selection |
+| `enterprise_vintage_months` | number | optional | Accepted, not yet used in scheme selection |
+| `requested_scheme` | string | optional | `"MUDRA"` or `"Stand-Up India"`. Bypasses cost-based routing — MUDRA's real range (≤Rs 10L) sits entirely inside the Micro Finance / Term Loan cost bands, and Stand-Up India's Rs 10L-50L portion is otherwise claimed by Term Loan Scheme; both are unreachable without this |
 
 ```json
 {
@@ -137,7 +142,7 @@ Owner: `services/calculator` (person 3)
 |---|---|---|---|
 | `project_cost` | number | required | INR |
 | `scheme_selected` | object | required | |
-| `scheme_selected.name` | string | required | e.g. `"PMEGP"`, `"MUDRA"`, `"Stand-Up India"` |
+| `scheme_selected.name` | string | required | e.g. `"PMEGP"`, `"MUDRA (Shishu)"`, `"MUDRA (Kishor)"`, `"MUDRA (Tarun)"`, `"Stand-Up India"` |
 | `scheme_selected.subsidy_percent` | number | required | 0–100 |
 | `loan_amount` | number | required | INR |
 | `emi_schedule` | array<object> | required | Monthly rows |
