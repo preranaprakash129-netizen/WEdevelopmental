@@ -289,6 +289,39 @@ Owner: `services/advisory-llm` (person 6)
 
 ---
 
+## 5. `POST /applications` and `GET /applications`
+
+Owner: `backend-api` directly (not a proxy — there's no dedicated microservice for this;
+`backend-api` persists to Postgres itself). Added after the original 4-endpoint contract to
+back the officer dashboard's applicant list, replacing what used to be hardcoded placeholder
+rows in the frontend. Gateway path for both: `/api/applications`.
+
+### `POST /applications` — record a wizard run
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `location` | string | required | |
+| `category` | string | required | |
+| `applicant_name` | string | optional | No name field exists in the wizard's Intake step yet; omitted for now |
+| `ess_score` | number | optional | 0–100, from the ESS-scoring step if the applicant didn't skip it |
+| `status` | string | optional | Defaults to `"Under review"` |
+
+```json
+{ "location": "Rampur", "category": "dairy", "ess_score": 61.0 }
+```
+
+Response: `201` with the inserted row (`id`, `applicant_name`, `location`, `category`,
+`ess_score`, `status`, `created_at`). `400` if `location` or `category` is missing. `503`
+with the standard error shape if the database isn't reachable.
+
+### `GET /applications` — list recent applications
+
+No request body. Response: `200` with `{"applications": [...]}`, same row shape as above,
+newest first, capped at 100. `503` with the standard error shape if the database isn't
+reachable.
+
+---
+
 ## Open questions (track here, resolve async)
 
 - [x] Auth — resolved: none for this hackathon build (see Conventions above).

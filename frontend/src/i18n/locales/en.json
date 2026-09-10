@@ -13,7 +13,8 @@
     "feasibility": "Feasibility Report",
     "calculator": "Loan Calculator",
     "essScore": "Sustainability Score",
-    "dashboard": "Officer Dashboard"
+    "dashboard": "Officer Dashboard",
+    "advisoryChat": "Advisor Chat"
   },
   "intake": {
     "title": "Tell us about your business idea",
@@ -88,11 +89,20 @@
   "dashboard": {
     "title": "Officer Dashboard",
     "subtitle": "Overview of submitted applications",
-    "placeholder": "Applicant data will appear here once backend-api is connected.",
+    "empty": "No applications yet — run through the wizard to add one.",
+    "loadError": "Couldn't load applications right now. Please try again shortly.",
+    "essScoreSkipped": "Not scored",
     "columnApplicant": "Applicant",
     "columnCategory": "Category",
     "columnLocation": "Location",
     "columnEssScore": "ESS Score",
     "columnStatus": "Status"
+  },
+  "advisoryChat": {
+    "title": "Business Advisor Chat",
+    "subtitle": "Ask about schemes, eligibility, or how to apply — in your own words",
+    "emptyState": "Ask something like \"How do I apply for PMEGP?\" to get started.",
+    "inputPlaceholder": "Type your question...",
+    "sendCta": "Send"
   }
 }

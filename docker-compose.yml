@@ -26,6 +26,10 @@ services:
       CALCULATOR_URL: http://calculator:8002
       ESS_SCORING_URL: http://ess-scoring:8003
       ADVISORY_LLM_URL: http://advisory-llm:8004
+      # Same localhost-vs-container-hostname issue applies to the DB: .env's
+      # DATABASE_URL defaults to localhost (correct for running backend-api outside
+      # Docker against postgres's published port), so it must be overridden here too.
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/sih26091
     ports:
       - "8000:8000"
     depends_on:
