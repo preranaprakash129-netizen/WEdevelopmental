@@ -169,14 +169,13 @@ def _generate(
     # Imported here so mock mode runs without the SDK installed.
     import anthropic
 
-    client = anthropic.Anthropic()
-
     messages: List[dict] = [
         {"role": turn.role, "content": turn.content} for turn in history
     ]
     messages.append({"role": "user", "content": _user_block(message, language, hits)})
 
     try:
+        client = anthropic.Anthropic()
         response = client.messages.parse(
             model=settings.model,
             # A ceiling, not a target: answers are short, but adaptive thinking
@@ -195,6 +194,19 @@ def _generate(
             output_format=GroundedAnswer,
         )
     except anthropic.AuthenticationError as exc:
+        raise AdvisoryError(
+            "llm_unauthenticated",
+            "No usable Anthropic credentials. Set ANTHROPIC_API_KEY or run `ant auth login`, "
+            "or set ADVISORY_MODE=mock to run without the model.",
+            status_code=503,
+        ) from exc
+    except TypeError as exc:
+        # When no credential source resolves at all, the SDK raises this at
+        # request-build time — before any HTTP call, so it's a TypeError, not
+        # AuthenticationError. Same underlying problem, same response to the
+        # caller; anything else named TypeError is a real bug and should surface.
+        if "authentication" not in str(exc).lower():
+            raise
         raise AdvisoryError(
             "llm_unauthenticated",
             "No usable Anthropic credentials. Set ANTHROPIC_API_KEY or run `ant auth login`, "

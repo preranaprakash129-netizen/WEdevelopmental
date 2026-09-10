@@ -13,16 +13,16 @@
   "documents": [
     {
       "scheme": "PMEGP",
-      "document": "PMEGP Guidelines",
+      "document": "PMEGP (Prime Minister Employment Generation Programme) - Scheme Summary",
       "url": "https://kviconline.gov.in/pmegp",
-      "pdf_url": null,
+      "pdf_url": "https://msme1connect.up.gov.in/GovernmentScheme/GovernmentScheme638740881655062171.pdf",
       "source_pdf": "pmegp-guidelines.pdf"
     },
     {
       "scheme": "MUDRA",
-      "document": "Pradhan Mantri MUDRA Yojana",
+      "document": "MUDRA Loan Scheme - Salient Features",
       "url": "https://www.mudra.org.in/",
-      "pdf_url": null,
+      "pdf_url": "https://www.mudra.org.in/Default/DownloadFile/MudraLoan-SalientFeatures-English.pdf",
       "source_pdf": "mudra-pmmy.pdf"
     }
   ]

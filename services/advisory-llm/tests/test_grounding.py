@@ -176,3 +176,37 @@ def test_llm_failure_maps_to_the_contract_error_shape(rag_corpus, monkeypatch):
     resp = client.post("/advisory-chat", json={"message": "How do I apply for PMEGP?"})
     assert resp.status_code == 503
     assert set(resp.json()["error"]) == {"code", "message"}
+
+
+def test_missing_credentials_maps_to_the_contract_error_shape(rag_corpus, monkeypatch):
+    # This is the real failure the anthropic SDK raises when no credential
+    # source resolves at all — a client-side TypeError before any HTTP call,
+    # not anthropic.AuthenticationError. _generate must still map it to the
+    # contract's error shape instead of letting it escape as a bare 500.
+    import anthropic
+
+    def no_credentials(*args, **kwargs):
+        raise TypeError(
+            "Could not resolve authentication method. Expected one of api_key, "
+            "auth_token, or credentials to be set."
+        )
+
+    monkeypatch.setattr(anthropic, "Anthropic", no_credentials)
+
+    resp = client.post("/advisory-chat", json={"message": "How do I apply for PMEGP?"})
+    assert resp.status_code == 503
+    body = resp.json()
+    assert set(body["error"]) == {"code", "message"}
+    assert body["error"]["code"] == "llm_unauthenticated"
+
+
+def test_unrelated_type_error_is_not_swallowed_as_a_credentials_error(rag_corpus, monkeypatch):
+    import anthropic
+
+    def broken(*args, **kwargs):
+        raise TypeError("unsupported operand type(s) for +: 'int' and 'str'")
+
+    monkeypatch.setattr(anthropic, "Anthropic", broken)
+
+    with pytest.raises(TypeError):
+        client.post("/advisory-chat", json={"message": "How do I apply for PMEGP?"})
