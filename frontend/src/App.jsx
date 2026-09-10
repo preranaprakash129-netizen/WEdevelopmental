@@ -7,6 +7,7 @@ import FeasibilityPage from './pages/FeasibilityPage.jsx'
 import CalculatorPage from './pages/CalculatorPage.jsx'
 import EssScorePage from './pages/EssScorePage.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
+import AdvisoryChatPage from './pages/AdvisoryChatPage.jsx'
 
 export default function App() {
   const { isIntakeComplete, feasibility, calculator } = useIntake()
@@ -39,8 +40,10 @@ export default function App() {
             </RequireStep>
           }
         />
-        {/* Officer dashboard is a separate view, reachable anytime regardless of wizard progress. */}
+        {/* Officer dashboard and advisory chat are separate views, reachable anytime
+            regardless of wizard progress. */}
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/advisory-chat" element={<AdvisoryChatPage />} />
       </Route>
     </Routes>
   )

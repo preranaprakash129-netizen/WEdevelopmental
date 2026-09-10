@@ -1,8 +1,22 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { submitApplication } from '../api/applications.js'
 import { fetchEssScore } from '../api/essScore.js'
 import { useIntake } from '../context/IntakeContext.jsx'
 import { useI18n } from '../i18n/I18nContext.jsx'
+
+// Records this wizard run on the officer dashboard (see docs/api-contract.md #5). Best-effort:
+// a submission failure here (e.g. DB not up yet) must never block the applicant from
+// continuing, so callers swallow the error rather than surfacing it.
+function recordApplication(intake, essScoreResult) {
+  submitApplication({
+    location: intake.location,
+    category: intake.category,
+    ess_score: essScoreResult?.ess_score,
+  }).catch(() => {
+    // Dashboard just won't show this run; not worth interrupting the applicant's flow.
+  })
+}
 
 const EMPTY_PROFILE = {
   years_operating: '',
@@ -41,7 +55,10 @@ export default function EssScorePage() {
         has_bank_account: profile.has_bank_account,
       },
     })
-      .then(setEssScore)
+      .then((result) => {
+        setEssScore(result)
+        recordApplication(intake, result)
+      })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }
@@ -120,7 +137,10 @@ export default function EssScorePage() {
         </form>
 
         <button
-          onClick={() => navigate('/dashboard')}
+          onClick={() => {
+            recordApplication(intake, null)
+            navigate('/dashboard')
+          }}
           className="text-sm font-medium text-slate-500 hover:text-slate-700"
         >
           {t('essScore.skipCta')}

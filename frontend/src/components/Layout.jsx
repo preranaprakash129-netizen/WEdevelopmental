@@ -31,6 +31,9 @@ export default function Layout() {
             <NavLink to="/dashboard" className={navLinkClass}>
               {t('nav.dashboard')}
             </NavLink>
+            <NavLink to="/advisory-chat" className={navLinkClass}>
+              {t('nav.advisoryChat')}
+            </NavLink>
           </nav>
           <LanguageSwitcher />
         </div>

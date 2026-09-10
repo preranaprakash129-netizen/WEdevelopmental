@@ -7,13 +7,7 @@ export function isMockMode() {
   return USE_MOCKS
 }
 
-export async function postJson(path, body) {
-  const res = await fetch(`/api${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  })
-
+async function handleResponse(res, path) {
   if (!res.ok) {
     const payload = await res.json().catch(() => null)
     const message = payload?.error?.message || `Request to ${path} failed with ${res.status}`
@@ -24,6 +18,21 @@ export async function postJson(path, body) {
   }
 
   return res.json()
+}
+
+export async function postJson(path, body) {
+  const res = await fetch(`/api${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+
+  return handleResponse(res, path)
+}
+
+export async function getJson(path) {
+  const res = await fetch(`/api${path}`)
+  return handleResponse(res, path)
 }
 
 // Simulates network latency for mock responses so loading states are visible during dev.
