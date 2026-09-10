@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { fetchApplications } from '../api/applications.js'
 import { useI18n } from '../i18n/I18nContext.jsx'
 
@@ -35,6 +36,16 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-2xl font-semibold text-slate-900">{t('dashboard.title')}</h1>
         <p className="text-sm text-slate-500">{t('dashboard.subtitle')}</p>
+      </div>
+
+      <div className="flex flex-col gap-3 rounded-lg border border-indigo-200 bg-indigo-50 p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-indigo-900">{t('dashboard.aiBannerText')}</p>
+        <Link
+          to="/scheme-match"
+          className="inline-flex shrink-0 items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+        >
+          {t('dashboard.aiBannerCta')}
+        </Link>
       </div>
 
       {loading && <p className="text-slate-600">{t('common.loading')}</p>}

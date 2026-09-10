@@ -90,6 +90,8 @@
   "dashboard": {
     "title": "Officer Dashboard",
     "subtitle": "Overview of submitted applications",
+    "aiBannerText": "Two locally trained AI models power this platform — a scheme-match classifier (89.9% accuracy) and a chatbot advisor, both running fully offline.",
+    "aiBannerCta": "Try Scheme Match",
     "empty": "No applications yet — run through the wizard to add one.",
     "loadError": "Couldn't load applications right now. Please try again shortly.",
     "essScoreSkipped": "Not scored",
