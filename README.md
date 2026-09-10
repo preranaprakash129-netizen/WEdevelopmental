@@ -40,8 +40,12 @@ field, edit that file in a PR first and flag it to the team before changing your
 
 ## Getting started locally
 
+`.env` is gitignored and not tracked, but every service's `env_file: .env` in
+`docker-compose.yml` means compose won't start at all without one — copy the example
+first, even before your first run.
+
 ```bash
-cp .env.example .env      # fill in real keys
+cp .env.example .env      # required — compose fails to start without this
 docker compose up         # brings up postgres + backend-api
 ```
 
