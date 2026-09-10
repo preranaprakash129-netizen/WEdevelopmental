@@ -49,27 +49,85 @@ TERM_LOAN_SCHEME = SchemeTerms(
 # PLACEHOLDERS - NOT AUTHORITATIVE.
 #
 # The two schemes above are transcribed from the problem statement and are exact.
-# The three below are national schemes whose real eligibility depends on applicant
-# attributes the API contract does not carry (social group, gender, urban/rural,
-# enterprise vintage): PMEGP subsidy is 15-35% by category/area/social group, MUDRA
-# is tiered Shishu/Kishore/Tarun, and Stand-Up India is Rs 10L-1Cr restricted to
-# SC/ST and women borrowers. Encoding those properly needs a contract change.
-# Until then these exist only so project costs above Rs 50L route somewhere.
+# The schemes below are national schemes not defined by the PS; terms are sourced
+# from official scheme pages as of 2026 but marked provisional because, unlike the
+# two above, they weren't handed to us as exact figures and get revised over time
+# (MUDRA's ceilings in particular - see the Tarun Plus note below).
+#
+# PMEGP subsidy is actually 15-35% by category/area/social group; encoding that
+# needs a contract change beyond today's scope, so it stays a flat 25% fallback.
 PMEGP = SchemeTerms("PMEGP", Decimal("25"), None, None, Decimal("0.90"), None, Decimal("11"), 84, 6, provisional=True)
-MUDRA = SchemeTerms("MUDRA", Decimal("0"), None, None, Decimal("0.90"), 1_000_000, Decimal("10"), 60, 0, provisional=True)
-STAND_UP_INDIA = SchemeTerms("Stand-Up India", Decimal("0"), None, None, Decimal("0.90"), 10_000_000, Decimal("10"), 84, 18, provisional=True)
+
+# MUDRA (PMMY) tiers by project cost: Shishu <=Rs 50K, Kishor Rs 50K-5L, Tarun
+# Rs 5L-10L. (A "Tarun Plus" tier to Rs 20L exists for borrowers who've already
+# repaid a Tarun loan, but that needs loan-history data we don't have - not
+# implemented.) MUDRA's entire real range sits inside the Micro Finance / Term
+# Loan Scheme bands below, so it can never win by cost alone - see choose_scheme.
+MUDRA_SHISHU = SchemeTerms("MUDRA (Shishu)", Decimal("0"), 50_000, None, Decimal("0.90"), 50_000, Decimal("10"), 60, 0, provisional=True)
+MUDRA_KISHOR = SchemeTerms("MUDRA (Kishor)", Decimal("0"), 500_000, 50_000, Decimal("0.90"), 500_000, Decimal("10"), 60, 0, provisional=True)
+MUDRA_TARUN = SchemeTerms("MUDRA (Tarun)", Decimal("0"), 1_000_000, 500_000, Decimal("0.90"), 1_000_000, Decimal("10"), 60, 0, provisional=True)
+
+# Stand-Up India: Rs 10L-1Cr project cost, restricted to SC/ST or women-owned
+# enterprises. Repayable in 7 years with an 18-month moratorium.
+STAND_UP_INDIA = SchemeTerms("Stand-Up India", Decimal("0"), 10_000_000, 1_000_000, Decimal("0.90"), 10_000_000, Decimal("10"), 84, 18, provisional=True)
 
 
-def choose_scheme(project_cost: int) -> SchemeTerms:
-    """Route purely on project cost.
+def _choose_mudra_tier(project_cost: int) -> SchemeTerms | None:
+    """Ties go to the cheaper (lower) tier, same convention as the PS schemes."""
+    if project_cost <= MUDRA_SHISHU.max_project_cost:
+        return MUDRA_SHISHU
+    if project_cost <= MUDRA_KISHOR.max_project_cost:
+        return MUDRA_KISHOR
+    if project_cost <= MUDRA_TARUN.max_project_cost:
+        return MUDRA_TARUN
+    return None  # Above Rs 10L - outside MUDRA's real range (Tarun Plus not implemented).
 
-    The PS bands overlap at exactly Rs 1.40L ("up to 1.40L" vs "1.40L-50L"); the
-    tie goes to Micro Finance, which is cheaper for the borrower at 6.5% vs 8%.
+
+def _stand_up_india_eligible(social_category: str | None, gender: str | None) -> bool:
+    return social_category in ("sc", "st") or gender == "female"
+
+
+def choose_scheme(
+    project_cost: int,
+    *,
+    social_category: str | None = None,
+    gender: str | None = None,
+    requested_scheme: str | None = None,
+) -> SchemeTerms:
+    """Route on project cost, with two eligibility-based exceptions.
+
+    MUDRA's real range (<=Rs 10L) sits entirely inside the Micro Finance / Term
+    Loan bands below, so cost alone can never select it - it's only reachable via
+    an explicit `requested_scheme="MUDRA"` request. Stand-Up India (Rs 10L-1Cr,
+    SC/ST or woman-owned) only partially overlaps the >Rs 50L fallthrough by cost
+    alone - it's automatically reachable for its Rs 50L-1Cr portion, but Rs 10L-50L
+    is claimed by Term Loan Scheme first (the PS bands below are left untouched).
+    An explicit `requested_scheme="Stand-Up India"` request from an eligible
+    applicant unlocks that Rs 10L-50L gap too, same pattern as MUDRA.
     """
+    if requested_scheme == "MUDRA":
+        tier = _choose_mudra_tier(project_cost)
+        if tier is not None:
+            return tier
+        # Outside MUDRA's real range - fall through to normal cost-based routing.
+
+    if (
+        requested_scheme == "Stand-Up India"
+        and _stand_up_india_eligible(social_category, gender)
+        and STAND_UP_INDIA.min_project_cost <= project_cost <= STAND_UP_INDIA.max_project_cost
+    ):
+        return STAND_UP_INDIA
+    # Not eligible, or outside Rs 10L-1Cr - fall through to normal cost-based routing.
+
     if project_cost <= MICRO_FINANCE_SCHEME.max_project_cost:
         return MICRO_FINANCE_SCHEME
     if project_cost <= TERM_LOAN_SCHEME.max_project_cost:
         return TERM_LOAN_SCHEME
+    if (
+        STAND_UP_INDIA.min_project_cost <= project_cost <= STAND_UP_INDIA.max_project_cost
+        and _stand_up_india_eligible(social_category, gender)
+    ):
+        return STAND_UP_INDIA
     return PMEGP
 
 
@@ -158,8 +216,20 @@ def amortization_schedule(loan_amount: int, terms: SchemeTerms) -> list[dict[str
         return rows
 
 
-def calculate(margin_capital: int, requested_loan_amount: int | None) -> tuple[int, SchemeTerms, int, list[dict[str, int]]]:
+def calculate(
+    margin_capital: int,
+    requested_loan_amount: int | None,
+    *,
+    social_category: str | None = None,
+    gender: str | None = None,
+    requested_scheme: str | None = None,
+) -> tuple[int, SchemeTerms, int, list[dict[str, int]]]:
     project_cost = recommended_project_cost(margin_capital, requested_loan_amount)
-    terms = choose_scheme(project_cost)
+    terms = choose_scheme(
+        project_cost,
+        social_category=social_category,
+        gender=gender,
+        requested_scheme=requested_scheme,
+    )
     loan_amount = loan_amount_for(project_cost, margin_capital, requested_loan_amount, terms)
     return project_cost, terms, loan_amount, amortization_schedule(loan_amount, terms)

@@ -13,11 +13,14 @@ from decimal import Decimal
 
 from app.calculator import (
     MICRO_FINANCE_SCHEME,
-    MUDRA,
+    MUDRA_KISHOR,
+    MUDRA_SHISHU,
+    MUDRA_TARUN,
     PMEGP,
     STAND_UP_INDIA,
     TERM_LOAN_SCHEME,
     amortization_schedule,
+    calculate,
     choose_scheme,
     loan_amount_for,
     recommended_project_cost,
@@ -148,7 +151,7 @@ def test_working_capital_is_25_percent_of_project_cost():
 def test_ps_schemes_are_authoritative_and_the_rest_are_flagged():
     assert MICRO_FINANCE_SCHEME.provisional is False
     assert TERM_LOAN_SCHEME.provisional is False
-    for scheme in (PMEGP, MUDRA, STAND_UP_INDIA):
+    for scheme in (PMEGP, MUDRA_SHISHU, MUDRA_KISHOR, MUDRA_TARUN, STAND_UP_INDIA):
         assert scheme.provisional is True, f"{scheme.name} must stay flagged provisional"
 
 
@@ -175,3 +178,108 @@ def test_schedule_rows_are_internally_consistent():
         balances = [row["outstanding_balance"] for row in repayment]
         assert balances == sorted(balances, reverse=True)
         assert balances[-1] == 0
+
+
+# --- MUDRA: only reachable via explicit request ------------------------------
+#
+# MUDRA's real range (<=Rs 10L) sits entirely inside the Micro Finance / Term
+# Loan bands, which are never touched by cost alone (see choose_scheme). So
+# every case here passes requested_scheme="MUDRA" explicitly.
+
+
+def test_mudra_tier_selection_at_each_threshold():
+    assert choose_scheme(50_000, requested_scheme="MUDRA") is MUDRA_SHISHU
+    assert choose_scheme(50_001, requested_scheme="MUDRA") is MUDRA_KISHOR
+    assert choose_scheme(500_000, requested_scheme="MUDRA") is MUDRA_KISHOR
+    assert choose_scheme(500_001, requested_scheme="MUDRA") is MUDRA_TARUN
+    assert choose_scheme(1_000_000, requested_scheme="MUDRA") is MUDRA_TARUN
+
+
+def test_mudra_request_above_its_real_range_falls_back_to_cost_based_routing():
+    # Rs 20L exceeds Tarun's Rs 10L ceiling (Tarun Plus isn't implemented), so
+    # the request is ignored and normal cost-based routing takes over.
+    assert choose_scheme(2_000_000, requested_scheme="MUDRA") is TERM_LOAN_SCHEME
+
+
+def test_without_explicit_request_low_cost_still_goes_to_ps_schemes_not_mudra():
+    # Rs 50,000 is squarely inside MUDRA Shishu's range, but without
+    # requested_scheme="MUDRA" it must still resolve to Micro Finance, exactly
+    # as it did before MUDRA tiers existed.
+    assert choose_scheme(50_000) is MICRO_FINANCE_SCHEME
+
+
+# --- Stand-Up India: SC/ST or woman-owned, Rs 10L-1Cr project cost ----------
+
+
+def test_stand_up_india_selected_for_eligible_sc_st_applicant_in_range():
+    assert choose_scheme(6_000_000, social_category="sc") is STAND_UP_INDIA
+    assert choose_scheme(6_000_000, social_category="st") is STAND_UP_INDIA
+
+
+def test_stand_up_india_selected_for_eligible_woman_applicant_in_range():
+    assert choose_scheme(6_000_000, gender="female") is STAND_UP_INDIA
+
+
+def test_stand_up_india_not_selected_without_eligibility_falls_back_to_pmegp():
+    assert choose_scheme(6_000_000) is PMEGP
+    assert choose_scheme(6_000_000, social_category="general", gender="male") is PMEGP
+
+
+def test_stand_up_india_not_selected_above_its_1cr_ceiling_even_if_eligible():
+    assert choose_scheme(10_000_001, social_category="sc") is PMEGP
+
+
+def test_stand_up_india_range_below_50_lakh_is_unreachable_by_cost_alone():
+    # Stand-Up India's real range starts at Rs 10L, but Term Loan Scheme already
+    # claims up to Rs 50L and that routing is intentionally left untouched - so
+    # an eligible applicant at, say, Rs 20L still gets Term Loan Scheme by
+    # default, not Stand-Up India. See the explicit-request tests below for how
+    # to unlock this range, same pattern as MUDRA.
+    assert choose_scheme(2_000_000, social_category="sc") is TERM_LOAN_SCHEME
+
+
+def test_stand_up_india_explicit_request_unlocks_the_10l_50l_gap():
+    # Same Rs 20L, SC/ST-eligible case as above, but with an explicit request -
+    # now routes to Stand-Up India instead of falling through to Term Loan Scheme.
+    assert (
+        choose_scheme(2_000_000, social_category="sc", requested_scheme="Stand-Up India")
+        is STAND_UP_INDIA
+    )
+
+
+def test_stand_up_india_explicit_request_without_eligibility_still_falls_back():
+    assert (
+        choose_scheme(2_000_000, requested_scheme="Stand-Up India")
+        is TERM_LOAN_SCHEME
+    )
+
+
+def test_stand_up_india_explicit_request_below_its_10l_floor_falls_back():
+    # Rs 5L is below Stand-Up India's Rs 10L floor, so the request is ignored and
+    # normal cost-based routing takes over (Term Loan Scheme covers Rs 1.4L-50L).
+    assert (
+        choose_scheme(500_000, social_category="sc", requested_scheme="Stand-Up India")
+        is TERM_LOAN_SCHEME
+    )
+
+
+# --- Backward compatibility: calls without the new fields are unaffected ----
+
+
+def test_calculate_without_new_fields_matches_pre_existing_behavior():
+    project_cost, terms, loan_amount, schedule = calculate(500_000, None)
+    assert project_cost == 5_000_000
+    assert terms is TERM_LOAN_SCHEME
+    assert loan_amount == 4_500_000
+    assert len(schedule) == 90
+
+
+def test_calculator_request_schema_accepts_payload_with_only_original_fields():
+    from app.schemas import CalculatorRequest
+
+    request = CalculatorRequest(margin_capital=50_000, category="dairy", location="Rampur")
+    assert request.social_category is None
+    assert request.gender is None
+    assert request.is_rural is None
+    assert request.enterprise_vintage_months is None
+    assert request.requested_scheme is None
