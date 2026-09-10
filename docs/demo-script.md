@@ -80,10 +80,12 @@ curl -s http://localhost:8000/api/advisory-chat -H 'content-type: application/js
   `{"error": {"code": "..._unavailable", ...}}` instead of hanging — the UI should show an
   error state, not a blank screen. Worth clicking through once before the audience does.
 
-## ⚠️ Verification status
+## ✅ Verification status
 
-This script was written from the seed data and `docs/api-contract.md`, not from a fresh
-end-to-end run — Docker image pulls (`postgres:16-alpine`) are blocked by this sandbox's
-network policy, so `docker compose up` could not be completed here to confirm it live. Someone
-with a working Docker setup should run through both paths once before presenting, and flag
-this file if any response shape differs from what's documented above.
+The script's field values and expected responses were derived from the seed data and
+`docs/api-contract.md`. On top of that, Kashif ran the full stack locally after PR #13 landed:
+all 7 containers came up healthy (`docker compose ps`), and the wizard returned real
+end-to-end responses from the backend rather than errors or blank states. If you run through
+it again before presenting, it's still worth a quick eyeball that the competitor names and
+price bands on screen match what's listed above for whichever seed location you use — response
+shapes can drift if a service changes without this doc being updated.
