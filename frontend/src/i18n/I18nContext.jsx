@@ -1,12 +1,14 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import en from './locales/en.json'
-import hi from './locales/hi.json'
+import kn from './locales/kn.json'
 
-// Add new languages here as they're populated. Only English is filled in for now;
-// missing keys in any other locale fall back to English so the UI never shows raw keys.
+// Add new languages here as they're populated. kn (Kannada) is fully translated as of this
+// revision — was hi (Hindi) before, but that locale file was still empty (never filled in),
+// so this is a straight swap, not an addition. Missing keys in any non-English locale fall
+// back to English so the UI never shows raw keys.
 export const LOCALES = {
   en: { label: 'English', messages: en },
-  hi: { label: 'हिन्दी', messages: hi },
+  kn: { label: 'ಕನ್ನಡ', messages: kn },
 }
 
 const STORAGE_KEY = 'sih26091.language'

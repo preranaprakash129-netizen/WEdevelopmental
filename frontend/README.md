@@ -33,9 +33,10 @@ before `backend-api` is up. Copy `.env.example` to `.env.local` and set
   `docs/api-contract.md` exactly.
 - `src/context/IntakeContext.jsx` — carries intake form data + feasibility/calculator
   results between wizard steps (backed by `sessionStorage`, cleared on tab close).
-- `src/i18n/` — language switcher scaffolding. `locales/en.json` is fully populated;
-  other locale files (e.g. `hi.json`) start empty and fall back to English key-by-key, so
-  adding a language is just filling in keys, not restructuring components.
+- `src/i18n/` — language switcher scaffolding. `locales/en.json` and `locales/kn.json`
+  (Kannada) are both fully populated; a new locale file starts empty and falls back to
+  English key-by-key, so adding a language is just filling in keys, not restructuring
+  components.
 
 ## Page flow
 
