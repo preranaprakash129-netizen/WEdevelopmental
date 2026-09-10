@@ -18,25 +18,37 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      # Container-to-container hostnames - backend-api's own code defaults these
+      # to localhost, which doesn't resolve between separate containers on the
+      # compose network, so these overrides are required, not just documentation.
+      FEASIBILITY_URL: http://feasibility:8001
+      CALCULATOR_URL: http://calculator:8002
+      ESS_SCORING_URL: http://ess-scoring:8003
+      ADVISORY_LLM_URL: http://advisory-llm:8004
     ports:
       - "8000:8000"
     depends_on:
       - postgres
+      - feasibility
+      - calculator
+      - ess-scoring
+      - advisory-llm
     volumes:
       - ./backend-api:/app
 
-  # --- Stub entries below: uncomment and fill in as each service gets a Dockerfile. ---
-  # Until then, run these locally with `uvicorn` per service README during dev.
-
-  # feasibility:
-  #   build: ./services/feasibility
-  #   restart: unless-stopped
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - "8001:8001"
-  #   volumes:
-  #     - ./services/feasibility:/app
+  feasibility:
+    build:
+      context: .
+      dockerfile: services/feasibility/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./services/feasibility:/app/services/feasibility
+      - ./data:/app/data
 
   calculator:
     build: ./services/calculator
@@ -48,15 +60,15 @@ services:
     volumes:
       - ./services/calculator:/app
 
-  # ess-scoring:
-  #   build: ./services/ess-scoring
-  #   restart: unless-stopped
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - "8003:8003"
-  #   volumes:
-  #     - ./services/ess-scoring:/app
+  ess-scoring:
+    build: ./services/ess-scoring
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./services/ess-scoring:/app
 
   advisory-llm:
     build: ./services/advisory-llm
