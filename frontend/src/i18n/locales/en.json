@@ -12,6 +12,7 @@
     "intake": "Intake",
     "feasibility": "Feasibility Report",
     "calculator": "Loan Calculator",
+    "essScore": "Sustainability Score",
     "dashboard": "Officer Dashboard"
   },
   "intake": {
@@ -62,6 +63,26 @@
     "principal": "Principal",
     "interest": "Interest",
     "balance": "Outstanding Balance",
+    "continueCta": "Check Sustainability Score"
+  },
+  "essScore": {
+    "title": "Enterprise Sustainability Score",
+    "intro": "Already running this business? Add a few details for a sustainability score and personalized improvement tips. This step is optional for brand-new businesses.",
+    "yearsOperatingLabel": "Years in operation",
+    "monthlyRevenueLabel": "Average monthly revenue (INR)",
+    "employeeCountLabel": "Number of employees (optional)",
+    "hasBankAccountLabel": "Business has a dedicated bank account",
+    "submitCta": "Calculate Score",
+    "skipCta": "Skip and view dashboard",
+    "overallScore": "ESS Score",
+    "subScores": "Sub-scores",
+    "financialHealth": "Financial Health",
+    "marketStability": "Market Stability",
+    "operationalMaturity": "Operational Maturity",
+    "growthPotential": "Growth Potential",
+    "attribution": "What's Driving This Score",
+    "topImprovement": "Top Recommended Action",
+    "expectedDelta": "Expected score gain",
     "continueCta": "View Dashboard"
   },
   "dashboard": {

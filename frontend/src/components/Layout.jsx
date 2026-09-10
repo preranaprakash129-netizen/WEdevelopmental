@@ -25,6 +25,9 @@ export default function Layout() {
             <NavLink to="/calculator" className={navLinkClass}>
               {t('nav.calculator')}
             </NavLink>
+            <NavLink to="/ess-score" className={navLinkClass}>
+              {t('nav.essScore')}
+            </NavLink>
             <NavLink to="/dashboard" className={navLinkClass}>
               {t('nav.dashboard')}
             </NavLink>
