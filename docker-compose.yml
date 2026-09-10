@@ -58,15 +58,15 @@ services:
   #   volumes:
   #     - ./services/ess-scoring:/app
 
-  # advisory-llm:
-  #   build: ./services/advisory-llm
-  #   restart: unless-stopped
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - "8004:8004"
-  #   volumes:
-  #     - ./services/advisory-llm:/app
+  advisory-llm:
+    build: ./services/advisory-llm
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./services/advisory-llm:/app
 
   # frontend:
   #   build: ./frontend

@@ -1,0 +1,4 @@
+# Source PDFs and the generated corpus stay out of git — they're large, and
+# manifest.json is enough for anyone to rebuild an identical corpus.
+pdfs/*.pdf
+chunks.jsonl
