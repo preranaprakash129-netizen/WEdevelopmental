@@ -8,9 +8,11 @@ import CalculatorPage from './pages/CalculatorPage.jsx'
 import EssScorePage from './pages/EssScorePage.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
 import AdvisoryChatPage from './pages/AdvisoryChatPage.jsx'
+import SchemeMatchPage from './pages/SchemeMatchPage.jsx'
 
 export default function App() {
-  const { isIntakeComplete, feasibility, calculator } = useIntake()
+  const { isIntakeComplete, feasibility, calculator, intake } = useIntake()
+  const hasCategory = Boolean(intake.category)
 
   return (
     <Routes>
@@ -37,6 +39,14 @@ export default function App() {
           element={
             <RequireStep ok={isIntakeComplete && Boolean(calculator)} fallback="/calculator">
               <EssScorePage />
+            </RequireStep>
+          }
+        />
+        <Route
+          path="/scheme-match"
+          element={
+            <RequireStep ok={hasCategory} fallback="/">
+              <SchemeMatchPage />
             </RequireStep>
           }
         />

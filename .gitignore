@@ -41,3 +41,9 @@ Thumbs.db
 coverage/
 htmlcov/
 .coverage
+
+# --- Trained ML artifacts (advisory-llm) ---
+# Regenerated at Docker build time (see services/advisory-llm/Dockerfile) from
+# a fixed RNG seed -- reproducible, so not worth committing as binaries.
+services/advisory-llm/models/
+services/advisory-llm/train/training_data.csv

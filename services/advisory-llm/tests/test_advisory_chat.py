@@ -91,8 +91,27 @@ def test_empty_message_is_rejected():
 
 
 def test_debug_status_reports_mock_mode_and_empty_corpus(monkeypatch, tmp_path):
+    # Explicit: ADVISORY_MODE now defaults to "local_ml" (see app/config.py), so
+    # this test pins mock mode itself rather than relying on the default.
+    monkeypatch.setenv("ADVISORY_MODE", "mock")
     monkeypatch.setenv("ADVISORY_CORPUS_DIR", str(tmp_path))
     body = client.get("/debug/status").json()
     assert body["mode"] == "mock"
     assert body["corpus_chunks"] == 0
     assert body["translator"] == "passthrough"
+
+
+def test_debug_status_defaults_to_local_ml_and_reports_model_availability(monkeypatch):
+    monkeypatch.delenv("ADVISORY_MODE", raising=False)
+    body = client.get("/debug/status").json()
+    assert body["mode"] == "local_ml"
+    assert "local_advisor_model_available" in body
+    assert "scheme_match_model_available" in body
+
+
+def test_advisory_chat_uses_local_ml_by_default(monkeypatch):
+    monkeypatch.delenv("ADVISORY_MODE", raising=False)
+    resp = client.post("/advisory-chat", json={"message": "Am I eligible for PMEGP?"})
+    assert resp.status_code == 200
+    body = resp.json()
+    assert [s["scheme"] for s in body["cited_sources"]] == ["PMEGP"]

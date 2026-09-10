@@ -30,3 +30,32 @@ class AdvisoryChatResponse(BaseModel):
     # rather than dropping the key.
     cited_sources: List[CitedSource]
     detected_language: str
+
+
+class SchemeMatchRequest(BaseModel):
+    """Mirrors the profile fields app/scheme_match.py's trained classifier expects."""
+
+    category: str
+    is_new_business: bool
+    years_operating: int = Field(ge=0)
+    gender: str  # "male" | "female"
+    is_sc_st: bool
+    location_type: str  # "urban" | "rural" | "semi-urban"
+    annual_family_income: int = Field(ge=0)
+    monthly_revenue: int = Field(ge=0)
+    requested_amount: int = Field(gt=0)
+    margin_capital: int = Field(ge=0)
+
+
+class SchemeMatchResult(BaseModel):
+    scheme: str
+    display_name: str
+    confidence: float
+    why: List[str]
+    url: str
+
+
+class SchemeMatchResponse(BaseModel):
+    request_id: str
+    results: List[SchemeMatchResult]
+    model_feature_importance: dict
