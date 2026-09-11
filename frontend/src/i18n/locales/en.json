@@ -99,7 +99,12 @@
     "columnCategory": "Category",
     "columnLocation": "Location",
     "columnEssScore": "ESS Score",
-    "columnStatus": "Status"
+    "columnStatus": "Status",
+    "insightsTitle": "AI Insights",
+    "insightsCategoryTitle": "Applications by category",
+    "insightsEssHistogramTitle": "ESS score distribution",
+    "insightsUnscoredSuffix": "application(s) not yet ESS-scored",
+    "insightsSchemeGapNote": "Matched-scheme breakdown isn't available yet — scheme-match results aren't currently saved to the database."
   },
   "advisoryChat": {
     "title": "Business Advisor Chat",
