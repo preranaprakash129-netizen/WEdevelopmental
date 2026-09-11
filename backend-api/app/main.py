@@ -218,6 +218,68 @@ def create_application(payload: dict):
     return JSONResponse(status_code=201, content=_serialize_row(row))
 
 
+ESS_SCORE_BUCKETS = ["0-20", "20-40", "40-60", "60-80", "80-100"]
+
+
+# Backs the Officer Dashboard's "AI Insights" section. Real aggregates computed from
+# the applications table -- no invented numbers. One gap, documented rather than
+# faked: scheme-match results (POST /api/scheme-match's classifier output) are never
+# persisted anywhere -- that call is a stateless proxy to advisory-llm, and this table
+# has no matched-scheme column -- so a per-scheme application count cannot be built
+# from real data today. matched_scheme_breakdown is returned as null so the frontend
+# can show an honest "not available yet" note instead of a missing field.
+@app.get("/api/applications/insights")
+def application_insights():
+    try:
+        with closing(get_conn()) as conn:
+            with conn:
+                with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                    cur.execute(
+                        """
+                        SELECT category, COUNT(*) AS count
+                        FROM applications
+                        GROUP BY category
+                        ORDER BY count DESC
+                        """
+                    )
+                    category_breakdown = [dict(row) for row in cur.fetchall()]
+
+                    cur.execute(
+                        """
+                        SELECT
+                            CASE
+                                WHEN ess_score IS NULL THEN NULL
+                                WHEN ess_score < 20 THEN '0-20'
+                                WHEN ess_score < 40 THEN '20-40'
+                                WHEN ess_score < 60 THEN '40-60'
+                                WHEN ess_score < 80 THEN '60-80'
+                                ELSE '80-100'
+                            END AS bucket,
+                            COUNT(*) AS count
+                        FROM applications
+                        GROUP BY bucket
+                        """
+                    )
+                    bucket_counts = {row["bucket"]: row["count"] for row in cur.fetchall()}
+    except Exception:  # noqa: BLE001 - DB may not be up yet; degrade, don't crash
+        logger.exception("Failed to compute application insights")
+        return _db_unavailable_response()
+
+    total_applications = sum(row["count"] for row in category_breakdown)
+
+    return {
+        "total_applications": total_applications,
+        "category_breakdown": category_breakdown,
+        "ess_score_histogram": {
+            "buckets": [
+                {"range": label, "count": bucket_counts.get(label, 0)} for label in ESS_SCORE_BUCKETS
+            ],
+            "unscored_count": bucket_counts.get(None, 0),
+        },
+        "matched_scheme_breakdown": None,
+    }
+
+
 @app.get("/api/applications")
 def list_applications():
     try:

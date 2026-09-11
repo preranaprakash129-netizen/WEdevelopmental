@@ -99,7 +99,12 @@
     "columnCategory": "ವರ್ಗ",
     "columnLocation": "ಸ್ಥಳ",
     "columnEssScore": "ESS ಅಂಕ",
-    "columnStatus": "ಸ್ಥಿತಿ"
+    "columnStatus": "ಸ್ಥಿತಿ",
+    "insightsTitle": "AI ಒಳನೋಟಗಳು",
+    "insightsCategoryTitle": "ವರ್ಗವಾರು ಅರ್ಜಿಗಳು",
+    "insightsEssHistogramTitle": "ESS ಅಂಕ ವಿತರಣೆ",
+    "insightsUnscoredSuffix": "ಅರ್ಜಿ(ಗಳು) ಇನ್ನೂ ESS ಅಂಕ ನೀಡಿಲ್ಲ",
+    "insightsSchemeGapNote": "ಹೊಂದಾಣಿಕೆಯಾದ ಯೋಜನೆಯ ವಿಭಜನೆ ಇನ್ನೂ ಲಭ್ಯವಿಲ್ಲ — ಯೋಜನಾ-ಹೊಂದಾಣಿಕೆ ಫಲಿತಾಂಶಗಳನ್ನು ಪ್ರಸ್ತುತ ಡೇಟಾಬೇಸ್‌ನಲ್ಲಿ ಉಳಿಸಲಾಗುತ್ತಿಲ್ಲ."
   },
   "advisoryChat": {
     "title": "ವ್ಯಾಪಾರ ಸಲಹೆಗಾರ ಚಾಟ್",
