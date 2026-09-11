@@ -11,6 +11,9 @@ moves — see `amortization_schedule` in app/calculator.py.
 
 from decimal import Decimal
 
+import pytest
+from pydantic import ValidationError
+
 from app.calculator import (
     MICRO_FINANCE_SCHEME,
     MUDRA_KISHOR,
@@ -26,6 +29,7 @@ from app.calculator import (
     recommended_project_cost,
     working_capital_for,
 )
+from app.schemas import CalculatorRequest
 
 
 # --- Term sheets, straight from the problem statement -----------------------
@@ -275,11 +279,47 @@ def test_calculate_without_new_fields_matches_pre_existing_behavior():
 
 
 def test_calculator_request_schema_accepts_payload_with_only_original_fields():
-    from app.schemas import CalculatorRequest
-
     request = CalculatorRequest(margin_capital=50_000, category="dairy", location="Rampur")
     assert request.social_category is None
     assert request.gender is None
     assert request.is_rural is None
     assert request.enterprise_vintage_months is None
     assert request.requested_scheme is None
+
+
+# --- Request validation: reject values that can't fund a real project ------
+#
+# A margin_capital or requested_loan_amount of Rs 0 doesn't crash anything (see
+# recommended_project_cost / loan_amount_for) but produces a degenerate all-zero
+# response - not a real applicant, so the schema rejects it outright.
+
+
+def test_zero_margin_capital_is_rejected():
+    with pytest.raises(ValidationError):
+        CalculatorRequest(margin_capital=0, category="dairy")
+
+
+def test_negative_margin_capital_is_rejected():
+    with pytest.raises(ValidationError):
+        CalculatorRequest(margin_capital=-1, category="dairy")
+
+
+def test_zero_requested_loan_amount_is_rejected():
+    with pytest.raises(ValidationError):
+        CalculatorRequest(margin_capital=50_000, category="dairy", requested_loan_amount=0)
+
+
+def test_negative_requested_loan_amount_is_rejected():
+    with pytest.raises(ValidationError):
+        CalculatorRequest(margin_capital=50_000, category="dairy", requested_loan_amount=-1)
+
+
+def test_empty_location_is_rejected():
+    with pytest.raises(ValidationError):
+        CalculatorRequest(margin_capital=50_000, category="dairy", location="")
+
+
+def test_enterprise_vintage_months_upper_bound_is_enforced():
+    CalculatorRequest(margin_capital=50_000, category="dairy", enterprise_vintage_months=1200)
+    with pytest.raises(ValidationError):
+        CalculatorRequest(margin_capital=50_000, category="dairy", enterprise_vintage_months=1201)

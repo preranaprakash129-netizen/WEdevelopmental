@@ -140,6 +140,7 @@ Owner: `services/calculator` (person 3)
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
+| `request_id` | string | required | uuid4, per the general conventions above |
 | `project_cost` | number | required | INR |
 | `scheme_selected` | object | required | |
 | `scheme_selected.name` | string | required | e.g. `"PMEGP"`, `"MUDRA (Shishu)"`, `"MUDRA (Kishor)"`, `"MUDRA (Tarun)"`, `"Stand-Up India"` |
