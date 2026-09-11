@@ -142,7 +142,9 @@
     "loanAmountFitLabel": "Loan amount",
     "eligibilityFitLabel": "Eligibility",
     "priorityBoostFitLabel": "Priority tier",
-    "improvementTipsTitle": "Why the match isn't stronger"
+    "improvementTipsTitle": "Why the match isn't stronger",
+    "documentsNeededTitle": "Documents needed",
+    "applyProcessTitle": "How to apply"
   },
   "applicationSummary": {
     "title": "Application Summary",
@@ -151,7 +153,6 @@
     "printCta": "Print / Save as PDF",
     "profileTitle": "Applicant & Business Profile",
     "topSchemeTitle": "Best-Matched Scheme",
-    "documentsGapNote": "Document requirements and the application process aren't available from this system yet — check the scheme's official page:",
     "disclaimer": "This is a locally generated summary to help you prepare your application — always confirm final requirements with the scheme's official office.",
     "yes": "Yes",
     "no": "No",

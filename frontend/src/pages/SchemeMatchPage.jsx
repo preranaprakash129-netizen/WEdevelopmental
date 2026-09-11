@@ -250,6 +250,30 @@ export default function SchemeMatchPage() {
               </ul>
             </div>
 
+            {r.documents && r.documents.length > 0 && (
+              <div className="mt-4">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  {t('schemeMatch.documentsNeededTitle')}
+                </p>
+                <ul className="flex flex-wrap gap-2">
+                  {r.documents.map((doc) => (
+                    <li key={doc} className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700">
+                      {doc}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {r.apply_process && (
+              <div className="mt-4">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  {t('schemeMatch.applyProcessTitle')}
+                </p>
+                <p className="text-sm text-slate-700">{r.apply_process}</p>
+              </div>
+            )}
+
             {i === 0 && r.match_breakdown && (
               <div className="mt-4 flex flex-col gap-4 border-t border-slate-200 pt-4 sm:flex-row sm:items-start">
                 <div className="shrink-0">
@@ -319,8 +343,7 @@ export default function SchemeMatchPage() {
 
       {/* New, separate addition: hands the top result off to a printable summary page
           (frontend/src/pages/ApplicationSummaryPage.jsx) via router navigation state --
-          nothing here is persisted or refetched. See that page for why documents/
-          apply_process aren't included (not currently returned by this endpoint). */}
+          nothing here is persisted or refetched. */}
       <button
         onClick={() =>
           navigate('/application-summary', {

@@ -5,12 +5,6 @@ import { useI18n } from '../i18n/I18nContext.jsx'
 // (SchemeMatchPage.jsx), which passes everything needed as router navigation state --
 // nothing is persisted or re-fetched here. Router state doesn't survive a page reload,
 // so a direct visit/reload with no state shows a friendly fallback rather than crashing.
-//
-// `documents` and `apply_process` are real fields in
-// services/advisory-llm/app/scheme_facts.py, but POST /api/scheme-match does not
-// currently return them (see SchemeMatchResult in services/advisory-llm/app/schemas.py)
-// -- so this summary cannot show them without inventing data. Shown instead: an honest
-// note plus the scheme's official URL, which the API does return.
 export default function ApplicationSummaryPage() {
   const { t } = useI18n()
   const location = useLocation()
@@ -120,8 +114,35 @@ export default function ApplicationSummaryPage() {
             ))}
           </ul>
         )}
+
+        {topResult.documents && topResult.documents.length > 0 && (
+          <div className="mt-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+              {t('schemeMatch.documentsNeededTitle')}
+            </p>
+            <ul className="mt-1 flex flex-wrap gap-2 print:gap-1">
+              {topResult.documents.map((doc) => (
+                <li
+                  key={doc}
+                  className="rounded-full bg-white px-3 py-1 text-xs text-slate-700 print:rounded-none print:border print:border-slate-300"
+                >
+                  {doc}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {topResult.apply_process && (
+          <div className="mt-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+              {t('schemeMatch.applyProcessTitle')}
+            </p>
+            <p className="mt-1 text-sm text-slate-700">{topResult.apply_process}</p>
+          </div>
+        )}
+
         <p className="mt-3 text-xs text-slate-500">
-          {t('applicationSummary.documentsGapNote')}{' '}
           <a href={topResult.url} target="_blank" rel="noreferrer" className="text-indigo-700 hover:underline">
             {topResult.url}
           </a>
