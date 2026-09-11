@@ -5,7 +5,7 @@ import { useI18n } from '../i18n/I18nContext.jsx'
 
 export default function IntakePage() {
   const { t } = useI18n()
-  const { intake, setIntake } = useIntake()
+  const { intake, setIntake, setFeasibility, setCalculator } = useIntake()
   const [form, setForm] = useState(intake)
   const navigate = useNavigate()
 
@@ -15,7 +15,10 @@ export default function IntakePage() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    setIntake(form)
+    setIntake({ ...form, margin_capital: Number(form.margin_capital) })
+    // Invalidate downstream results so a changed intake always triggers a fresh fetch.
+    setFeasibility(null)
+    setCalculator(null)
     navigate('/feasibility')
   }
 

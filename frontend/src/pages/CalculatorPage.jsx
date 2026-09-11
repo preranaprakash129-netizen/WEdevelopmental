@@ -19,7 +19,7 @@ export default function CalculatorPage() {
       margin_capital: intake.margin_capital,
       category: intake.category,
       location: intake.location,
-      requested_loan_amount: loanOverride || undefined,
+      requested_loan_amount: loanOverride ? Number(loanOverride) : undefined,
     })
       .then(setCalculator)
       .catch((err) => setError(err.message))
