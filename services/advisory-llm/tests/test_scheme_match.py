@@ -72,13 +72,35 @@ def test_scheme_match_endpoint_matches_contract_shape():
     for r in body["results"]:
         assert set(r) == {
             "scheme", "display_name", "confidence", "why", "url",
-            "match_breakdown", "improvement_tips",
+            "match_breakdown", "improvement_tips", "documents", "apply_process",
         }
         assert set(r["match_breakdown"]) == {
             "category_fit", "loan_amount_fit", "eligibility_fit", "priority_boost_fit",
         }
     assert isinstance(body["model_feature_importance"], dict)
     assert body["model_feature_importance"]
+
+
+def test_scheme_match_documents_and_apply_process_are_populated():
+    """documents/apply_process come straight from scheme_facts.py, which has
+    real (non-empty) values for every scheme in SCHEMES -- so any result
+    should carry them through, not just PMEGP specifically."""
+    resp = client.post("/scheme-match", json=RURAL_SC_ST_WOMAN_DAIRY)
+    body = resp.json()
+    for r in body["results"]:
+        facts = SCHEMES[r["scheme"]]
+        assert r["documents"] == facts.documents
+        assert r["documents"]
+        assert r["apply_process"] == facts.apply_process
+        assert r["apply_process"]
+
+
+def test_pmegp_documents_and_apply_process_match_scheme_facts():
+    facts = SCHEMES["PMEGP"]
+    result = next((r for r in scheme_match.predict_ranked_schemes(NEW_URBAN_FOOD_PROCESSING, top_k=6) if r["scheme"] == "PMEGP"), None)
+    assert result is not None
+    assert result["documents"] == facts.documents
+    assert result["apply_process"] == facts.apply_process
 
 
 def test_scheme_match_endpoint_rejects_missing_fields():

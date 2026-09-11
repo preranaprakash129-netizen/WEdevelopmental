@@ -20,6 +20,15 @@ const MOCK_RESPONSE = {
       url: 'https://kswdc.karnataka.gov.in/',
       match_breakdown: { category_fit: 1.0, loan_amount_fit: 1.0, eligibility_fit: 1.0, priority_boost_fit: 1.0 },
       improvement_tips: [],
+      documents: [
+        'identity/address proof',
+        'project report',
+        'income certificate',
+        'caste certificate (if applicable)',
+        'BPL card (if applicable)',
+      ],
+      apply_process:
+        "Apply online via a participating bank/NBFC, or offline via kswdc.karnataka.gov.in forms through your district's Child Development Project Officer.",
     },
     {
       scheme: 'PMFME',
@@ -33,6 +42,8 @@ const MOCK_RESPONSE = {
       url: 'https://pmfme.mofpi.gov.in/',
       match_breakdown: { category_fit: 1.0, loan_amount_fit: 1.0, eligibility_fit: 1.0, priority_boost_fit: 0.5 },
       improvement_tips: [],
+      documents: ['business/unit details', 'project report', 'SHG/FPO membership (if applying as a group)'],
+      apply_process: 'Apply through your State Nodal Agency / District Resource Person, or the PMFME portal.',
     },
     {
       scheme: 'CGTMSE',
@@ -48,6 +59,8 @@ const MOCK_RESPONSE = {
       improvement_tips: [
         'Credit Guarantee Fund Trust for Micro and Small Enterprises (CGTMSE) offers a higher subsidy/coverage tier for SC/ST or women applicants -- this profile doesn\'t currently qualify for that higher tier, which is part of why the overall match isn\'t stronger.',
       ],
+      documents: ['Udyam registration', 'loan application via your bank/NBFC'],
+      apply_process: 'Not applied for directly -- your bank or NBFC requests the guarantee cover as part of processing your loan.',
     },
   ],
   model_feature_importance: {

@@ -210,8 +210,8 @@ def predict_ranked_schemes(profile: Dict, top_k: int = 3) -> List[Dict]:
     monthly_revenue (int), requested_amount (int), margin_capital (int).
 
     Returns a list of {scheme, display_name, confidence, why, url,
-    match_breakdown, improvement_tips}, ranked by the model's predicted
-    probability, highest first.
+    match_breakdown, improvement_tips, documents, apply_process}, ranked by
+    the model's predicted probability, highest first.
     """
     bundle = _load()
     pipeline = bundle["pipeline"]
@@ -240,6 +240,8 @@ def predict_ranked_schemes(profile: Dict, top_k: int = 3) -> List[Dict]:
                 "url": facts.url,
                 "match_breakdown": breakdown,
                 "improvement_tips": _improvement_tips(scheme_key, profile, breakdown),
+                "documents": facts.documents,
+                "apply_process": facts.apply_process,
             }
         )
     return results

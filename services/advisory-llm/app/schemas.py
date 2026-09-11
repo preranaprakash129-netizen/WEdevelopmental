@@ -66,6 +66,8 @@ class SchemeMatchResult(BaseModel):
     url: str
     match_breakdown: MatchBreakdown
     improvement_tips: List[str]
+    documents: List[str]
+    apply_process: str
 
 
 class SchemeMatchResponse(BaseModel):

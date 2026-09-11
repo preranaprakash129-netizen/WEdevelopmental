@@ -384,6 +384,8 @@ gated behind the chat mode.
 | `results[].match_breakdown.eligibility_fit` | number | required | Fraction of the scheme's hard eligibility gates (new-business, SC/ST-or-woman, women-only, income cap) this profile satisfies; 1.0 if none apply |
 | `results[].match_breakdown.priority_boost_fit` | number | required | 1.0 = scheme has a higher special-category tier and profile qualifies; 0.0 = tier exists but doesn't qualify; 0.5 = scheme has no such tier (not applicable, not a penalty) |
 | `results[].improvement_tips` | array<string> | required | Up to 3 plain-language, rule-based notes on the weakest axis and why — informational only, never framed as a suggestion to change identity/category to qualify |
+| `results[].documents` | array<string> | required | Documents typically needed to apply, from `scheme_facts.py`'s static ground truth |
+| `results[].apply_process` | string | required | Plain-language description of how/where to apply, from `scheme_facts.py`'s static ground truth |
 | `model_feature_importance` | object | required | Global feature importances from the trained model, for transparency |
 
 ```json
@@ -405,7 +407,15 @@ gated behind the chat mode.
         "eligibility_fit": 1.0,
         "priority_boost_fit": 1.0
       },
-      "improvement_tips": []
+      "improvement_tips": [],
+      "documents": [
+        "identity/address proof",
+        "project report",
+        "income certificate",
+        "caste certificate (if applicable)",
+        "BPL card (if applicable)"
+      ],
+      "apply_process": "Apply online via a participating bank/NBFC, or offline via kswdc.karnataka.gov.in forms through your district's Child Development Project Officer."
     }
   ],
   "model_feature_importance": {
