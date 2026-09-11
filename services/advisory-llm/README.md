@@ -100,8 +100,41 @@ implemented. Leave it unset.
   to swap if we need continuity across restarts or replicas.
 - LangChain is used for document splitting; model calls go through the official
   `anthropic` SDK directly rather than a wrapper.
-- `docker-compose.yml` still has this service commented out. The `Dockerfile` is here and
-  works — uncommenting that block is a one-line change on the gateway owner's side.
+- `docker-compose.yml` has this service wired up and running (`docker compose up` starts
+  it along with everything else) — the note that used to be here about it being commented
+  out is stale, left over from an earlier stage of the build.
+
+## Local ML models (scheme-match + chatbot) — `ADVISORY_MODE=local_ml`
+
+This is now the **default** mode (not `mock`) — fully offline, no external API call, no
+`ANTHROPIC_API_KEY` needed. A trained `RandomForestClassifier` ranks government schemes
+for a business profile (`POST /scheme-match`), and a pair of TF-IDF/SVM classifiers route
+chatbot questions to a `(scheme, intent)` pair, answered from `app/scheme_facts.py`'s
+structured data — see `app/scheme_match.py` and `app/local_advisor.py` for the full
+rationale.
+
+The trained artifacts (`models/*.joblib`) are **gitignored** — deterministic (fixed RNG
+seeds) and trivially reproducible, not worth committing as binaries. `docker compose build
+advisory-llm` regenerates them automatically at image build time (see the `Dockerfile`).
+
+**If you're running the service outside Docker** (or the container's dev bind-mount is
+shadowing the image's baked-in models — check `GET /debug/status`, both
+`*_model_available` should be `true`), regenerate them onto the host directly:
+
+```bash
+cd services/advisory-llm
+python -m venv .venv && .venv/Scripts/activate   # or source .venv/bin/activate on macOS/Linux
+pip install -r requirements.txt
+python train/generate_training_data.py
+python train/train_scheme_match.py
+python train/train_local_advisor.py
+```
+
+Verified reproducible: re-running these from scratch on 2026-09-11 produced identical
+feature importances and accuracy figures (scheme-match: 89.9% holdout / 88.6% macro F1 /
+89.85% ± 0.71% 5-fold CV; chatbot: 90% scheme-classifier / 70% intent-classifier holdout
+accuracy) to what's reported in `models/scheme_match_report.txt` and
+`models/local_advisor_report.txt` after training.
 
 ## Tests
 
