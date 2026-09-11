@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { fetchSchemeMatch } from '../api/schemeMatch.js'
 import MatchRadarChart from '../components/MatchRadarChart.jsx'
 import { useIntake } from '../context/IntakeContext.jsx'
@@ -21,7 +22,8 @@ const EMPTY_PROFILE = {
 // intake step; this page only collects the extra fields the classifier needs.
 export default function SchemeMatchPage() {
   const { t } = useI18n()
-  const { intake } = useIntake()
+  const { intake, essScore } = useIntake()
+  const navigate = useNavigate()
   const [profile, setProfile] = useState(EMPTY_PROFILE)
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -313,6 +315,26 @@ export default function SchemeMatchPage() {
         className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
       >
         {t('schemeMatch.recalculate')}
+      </button>
+
+      {/* New, separate addition: hands the top result off to a printable summary page
+          (frontend/src/pages/ApplicationSummaryPage.jsx) via router navigation state --
+          nothing here is persisted or refetched. See that page for why documents/
+          apply_process aren't included (not currently returned by this endpoint). */}
+      <button
+        onClick={() =>
+          navigate('/application-summary', {
+            state: {
+              intake: { location: intake.location, category: intake.category, margin_capital: intake.margin_capital },
+              profile,
+              topResult: results[0],
+              essScore,
+            },
+          })
+        }
+        className="ml-2 rounded-md border border-indigo-300 bg-white px-4 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-50"
+      >
+        {t('applicationSummary.saveSummaryCta')}
       </button>
     </div>
   )
