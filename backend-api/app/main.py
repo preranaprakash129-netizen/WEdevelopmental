@@ -1,24 +1,69 @@
 import logging
 import os
 from contextlib import closing
+from typing import Optional
 
 import httpx
 import psycopg2
 import psycopg2.extras
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger("backend-api")
 
 app = FastAPI(title="SIH26091 backend-api", version="0.1.0")
 
+# Was allow_origins=["*"] (wide open). In practice the frontend never makes a
+# cross-origin browser request here at all -- both dev (vite.config.js's proxy)
+# and docker-compose (frontend/nginx.conf's proxy_pass) forward /api/* to
+# backend-api server-side, so the browser only ever sees same-origin requests to
+# whatever origin served the page. Locked to those two origins anyway, as
+# defense-in-depth against some other page trying to call this API directly from
+# a browser. Override via CORS_ALLOWED_ORIGINS (comma-separated) if the demo runs
+# from a different host/IP than localhost.
+CORS_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=CORS_ALLOWED_ORIGINS,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
 )
+
+
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    """Basic hardening headers, applied to every response. CSP here is `default-src
+    'none'` because backend-api only ever serves JSON, never HTML -- it doesn't need
+    to allow loading any resource type. (This does NOT cover the frontend's own served
+    HTML/JS -- that would need a CSP header from frontend/nginx.conf instead, which is
+    outside this task's backend-api-only scope; flagged as a follow-up.)"""
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
+    return response
+
+
+# Matches the {"error": {"code", "message"}} shape every service in this contract uses
+# for errors (see docs/api-contract.md > Conventions) -- FastAPI's default validation
+# error shape ({"detail": [...]}) doesn't, and this is the one route in this file that
+# actually validates its input rather than just proxying a dict downstream.
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    message = "; ".join(f"{'.'.join(str(p) for p in e['loc'])}: {e['msg']}" for e in exc.errors())
+    return JSONResponse(
+        status_code=422,
+        content={"error": {"code": "validation_error", "message": message}},
+    )
+
 
 # Downstream service base URLs. backend-api is the only service allowed to call
 # these directly (see docs/api-contract.md > Orchestration). All four routes now
@@ -180,24 +225,23 @@ def _db_unavailable_response():
 # Not part of docs/api-contract.md's original 4 endpoints — added to back the officer
 # dashboard's applicant list (previously hardcoded placeholder rows in the frontend).
 # Each wizard run that reaches the ESS-score step (or skips it) records a row here.
-@app.post("/api/applications")
-def create_application(payload: dict):
-    location = payload.get("location")
-    category = payload.get("category")
-    if not location or not category:
-        return JSONResponse(
-            status_code=400,
-            content={
-                "error": {
-                    "code": "invalid_application",
-                    "message": "location and category are required",
-                }
-            },
-        )
-    applicant_name = payload.get("applicant_name")
-    ess_score = payload.get("ess_score")
-    status = payload.get("status") or "Under review"
+#
+# This is the one route in this file that actually processes its input locally
+# (writes to Postgres) rather than just forwarding a dict to a downstream service
+# that validates it -- so unlike the proxy routes above, it gets its own Pydantic
+# model. Bounds are deliberately generous (this is applicant-entered business data,
+# not a security-critical field) but real: a length cap on every text field, and
+# ess_score bounded to the 0-100 range the contract defines everywhere else.
+class CreateApplicationRequest(BaseModel):
+    applicant_name: Optional[str] = Field(default=None, max_length=200)
+    location: str = Field(min_length=1, max_length=200)
+    category: str = Field(min_length=1, max_length=100)
+    ess_score: Optional[float] = Field(default=None, ge=0, le=100)
+    status: str = Field(default="Under review", max_length=50)
 
+
+@app.post("/api/applications")
+def create_application(payload: CreateApplicationRequest):
     try:
         with closing(get_conn()) as conn:
             with conn:
@@ -208,7 +252,7 @@ def create_application(payload: dict):
                         VALUES (%s, %s, %s, %s, %s)
                         RETURNING id, applicant_name, location, category, ess_score, status, created_at
                         """,
-                        (applicant_name, location, category, ess_score, status),
+                        (payload.applicant_name, payload.location, payload.category, payload.ess_score, payload.status),
                     )
                     row = cur.fetchone()
     except Exception:  # noqa: BLE001 - DB may not be up yet; degrade, don't crash
