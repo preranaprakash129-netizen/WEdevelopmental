@@ -179,6 +179,14 @@ Owner: `services/calculator` (person 3)
 
 Owner: `services/ess-scoring` (person 4)
 
+> **Note:** `backend-api` collects the wizard's intake fields (`category` from the
+> Intake step, plus `years_operating` / `monthly_revenue` / `employee_count` /
+> `has_bank_account` from the ESS-score step's own form) and forwards them to this
+> endpoint as `profile_data` — see [Orchestration](#orchestration) above. `business_id`
+> exists for looking up an already-registered profile and is unrelated to the intake
+> wizard's flow; `calculator` is a separate, non-chained gateway call and does not feed
+> into this request.
+
 ### Request
 
 Exactly one of `business_id` or `profile_data` is required.
