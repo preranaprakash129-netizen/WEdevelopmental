@@ -378,6 +378,12 @@ gated behind the chat mode.
 | `results[].confidence` | number | required | 0–1, model confidence — see rule-distillation caveat above |
 | `results[].why` | array<string> | required | Plain-language, rule-based reasons (not model self-explanation) |
 | `results[].url` | string | required | Official scheme page |
+| `results[].match_breakdown` | object | required | Four deterministic, rule-based 0–1 sub-scores behind `confidence` — added 2026-09-10 to power an "AI insights" breakdown chart on the frontend (see `services/advisory-llm/app/scheme_match.py`'s `_match_breakdown`). NOT the Random Forest's internal feature contributions — a separate, fully transparent rule-based decomposition using the same `scheme_facts.py` rules that labeled the training data. |
+| `results[].match_breakdown.category_fit` | number | required | 1.0 if the scheme has no category restriction or the profile's category matches; 0.25 otherwise |
+| `results[].match_breakdown.loan_amount_fit` | number | required | How well `requested_amount` sits inside the scheme's loan range; 1.0 for non-credit schemes (no loan amount applies) |
+| `results[].match_breakdown.eligibility_fit` | number | required | Fraction of the scheme's hard eligibility gates (new-business, SC/ST-or-woman, women-only, income cap) this profile satisfies; 1.0 if none apply |
+| `results[].match_breakdown.priority_boost_fit` | number | required | 1.0 = scheme has a higher special-category tier and profile qualifies; 0.0 = tier exists but doesn't qualify; 0.5 = scheme has no such tier (not applicable, not a penalty) |
+| `results[].improvement_tips` | array<string> | required | Up to 3 plain-language, rule-based notes on the weakest axis and why — informational only, never framed as a suggestion to change identity/category to qualify |
 | `model_feature_importance` | object | required | Global feature importances from the trained model, for transparency |
 
 ```json
@@ -392,7 +398,14 @@ gated behind the chat mode.
         "Open to existing businesses, not just new ones.",
         "Requested amount fits the scheme's Rs.0-Rs.300,000 range."
       ],
-      "url": "https://kswdc.karnataka.gov.in/"
+      "url": "https://kswdc.karnataka.gov.in/",
+      "match_breakdown": {
+        "category_fit": 1.0,
+        "loan_amount_fit": 1.0,
+        "eligibility_fit": 1.0,
+        "priority_boost_fit": 1.0
+      },
+      "improvement_tips": []
     }
   ],
   "model_feature_importance": {

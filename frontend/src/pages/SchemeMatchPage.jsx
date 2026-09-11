@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { fetchSchemeMatch } from '../api/schemeMatch.js'
+import MatchRadarChart from '../components/MatchRadarChart.jsx'
 import { useIntake } from '../context/IntakeContext.jsx'
 import { useI18n } from '../i18n/I18nContext.jsx'
 
@@ -246,6 +247,37 @@ export default function SchemeMatchPage() {
                 ))}
               </ul>
             </div>
+
+            {i === 0 && r.match_breakdown && (
+              <div className="mt-4 flex flex-col gap-4 border-t border-slate-200 pt-4 sm:flex-row sm:items-start">
+                <div className="shrink-0">
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    {t('schemeMatch.matchBreakdownTitle')}
+                  </p>
+                  <MatchRadarChart
+                    breakdown={r.match_breakdown}
+                    labels={{
+                      category_fit: t('schemeMatch.categoryFitLabel'),
+                      loan_amount_fit: t('schemeMatch.loanAmountFitLabel'),
+                      eligibility_fit: t('schemeMatch.eligibilityFitLabel'),
+                      priority_boost_fit: t('schemeMatch.priorityBoostFitLabel'),
+                    }}
+                  />
+                </div>
+                {r.improvement_tips && r.improvement_tips.length > 0 && (
+                  <div className="flex-1">
+                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      {t('schemeMatch.improvementTipsTitle')}
+                    </p>
+                    <ul className="list-disc space-y-1 pl-5 text-sm text-slate-600">
+                      {r.improvement_tips.map((tip) => (
+                        <li key={tip}>{tip}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
           </section>
         ))}
       </div>

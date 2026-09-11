@@ -70,7 +70,13 @@ def test_scheme_match_endpoint_matches_contract_shape():
     assert body["request_id"]
     assert body["results"]
     for r in body["results"]:
-        assert set(r) == {"scheme", "display_name", "confidence", "why", "url"}
+        assert set(r) == {
+            "scheme", "display_name", "confidence", "why", "url",
+            "match_breakdown", "improvement_tips",
+        }
+        assert set(r["match_breakdown"]) == {
+            "category_fit", "loan_amount_fit", "eligibility_fit", "priority_boost_fit",
+        }
     assert isinstance(body["model_feature_importance"], dict)
     assert body["model_feature_importance"]
 
@@ -84,3 +90,27 @@ def test_model_feature_importance_is_populated():
     importance = scheme_match.model_feature_importance()
     assert importance
     assert all(0.0 <= v <= 1.0 for v in importance.values())
+
+
+def test_match_breakdown_and_improvement_tips_present_and_bounded():
+    profile = {
+        "category": "tailoring",
+        "is_new_business": True,
+        "years_operating": 0,
+        "gender": "male",
+        "is_sc_st": False,
+        "location_type": "urban",
+        "annual_family_income": 500000,
+        "monthly_revenue": 0,
+        "requested_amount": 9000000,
+        "margin_capital": 200000,
+    }
+    results = scheme_match.predict_ranked_schemes(profile, top_k=3)
+    for r in results:
+        assert set(r["match_breakdown"]) == {
+            "category_fit", "loan_amount_fit", "eligibility_fit", "priority_boost_fit",
+        }
+        for v in r["match_breakdown"].values():
+            assert 0.0 <= v <= 1.0
+        assert isinstance(r["improvement_tips"], list)
+        assert len(r["improvement_tips"]) <= 3

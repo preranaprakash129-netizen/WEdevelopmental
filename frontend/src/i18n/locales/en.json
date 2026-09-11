@@ -131,6 +131,12 @@
     "whyLabel": "Why this scheme",
     "featureImportanceTitle": "What the model weighs most",
     "disclaimer": "Confidence reflects how closely your profile matches the eligibility patterns this model was trained on — trained on a rule-based eligibility engine's synthetic labels, not real historical loan approvals. Always confirm final eligibility with the scheme's official office.",
-    "recalculate": "Try another profile"
+    "recalculate": "Try another profile",
+    "matchBreakdownTitle": "AI match breakdown",
+    "categoryFitLabel": "Category",
+    "loanAmountFitLabel": "Loan amount",
+    "eligibilityFitLabel": "Eligibility",
+    "priorityBoostFitLabel": "Priority tier",
+    "improvementTipsTitle": "Why the match isn't stronger"
   }
 }

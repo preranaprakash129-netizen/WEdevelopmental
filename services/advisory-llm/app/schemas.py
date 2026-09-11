@@ -47,12 +47,25 @@ class SchemeMatchRequest(BaseModel):
     margin_capital: int = Field(ge=0)
 
 
+class MatchBreakdown(BaseModel):
+    """Four deterministic, rule-based 0-1 sub-scores behind `confidence` --
+    powers the "AI Insights" breakdown chart on the frontend. See
+    app/scheme_match.py's _match_breakdown for how each is computed."""
+
+    category_fit: float
+    loan_amount_fit: float
+    eligibility_fit: float
+    priority_boost_fit: float
+
+
 class SchemeMatchResult(BaseModel):
     scheme: str
     display_name: str
     confidence: float
     why: List[str]
     url: str
+    match_breakdown: MatchBreakdown
+    improvement_tips: List[str]
 
 
 class SchemeMatchResponse(BaseModel):
